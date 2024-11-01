@@ -16,7 +16,13 @@ h1 {
 
 #speakButton {
     font-size: 18px;
+    color:#767474;
+    background-color: #000000;
+    border: 0 solid rgb(72, 72, 72);
+    border-right-width: 2px;
+    border-bottom-width: 2px;
     padding: 10px 20px;
+    border-radius: 30px;
     margin-bottom: 20px;
 }
 

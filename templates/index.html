@@ -4,17 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Audio Visualizer</title>
-    <link rel="stylesheet" href="/static/css/styles.css">
+    <title>Audio Visualizer and Speech Recognition</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
-    <h1>Audio Visualizer</h1>
+    <h1>Audio Visualizer and Speech Recognition</h1>
     <button id="speakButton">Speak</button>
     <div id="audioGraph"></div>
+    <div id="transcriptionResult"></div>
 
     <script src="/static/js/audio_visualizer.js"></script>
+    <script src="/static/js/speech_recognition.js"></script>
 </body>
 
 </html>

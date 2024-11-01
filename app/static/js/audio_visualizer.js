@@ -75,7 +75,7 @@ function updateGraph() {
         y: volumeData.map(d => d.y),
         type: 'scatter',
         mode: 'lines',
-        line: {color: '#aaff00', width: 1}
+        line: {color: '#F148FB', width: 1}
     }], {
         title: 'Real-time Audio Volume',
         xaxis: {
@@ -109,7 +109,7 @@ Plotly.newPlot(graphDiv, [{
     y: [],
     type: 'scatter',
     mode: 'lines',
-    line: {color: '#7fffd4', width: 1}
+    line: {color: '#ff00ff', width: 1}
 }], {
     title: 'Real-time Audio Volume',
     xaxis: {
