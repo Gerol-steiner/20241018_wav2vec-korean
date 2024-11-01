@@ -1,25 +1,21 @@
-from fastapi import APIRouter, Request, File, UploadFile
-from fastapi.templating import Jinja2Templates
+from fastapi import APIRouter, File, UploadFile
 import whisper
 
+# APIRouterのインスタンスを作成
 router = APIRouter()
-templates = Jinja2Templates(directory="templates")
 
 # Whisperモデルのロード
-model = whisper.load_model("base")
-
-@router.get("/")
-async def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+model = whisper.load_model("base")  # モデル名は必要に応じて変更する
 
 @router.post("/transcribe")
-async def transcribe_audio(audio: UploadFile = File(...)):
-    with open("temp_audio.webm", "wb") as buffer:
-        buffer.write(await audio.read())
+async def transcribe(audio: UploadFile = File(...)):
+    audio_path = "temp_audio.webm"
     
-    try:
-        result = model.transcribe("temp_audio.webm")
-        return {"text": result["text"]}
-    except Exception as e:
-        print(f"Error during transcription: {e}")
-        return {"text": "Transcription failed."}
+    # アップロードされた音声ファイルを一時的に保存
+    with open(audio_path, "wb") as buffer:
+        buffer.write(await audio.read())
+
+    # Whisperによる音声認識
+    result = model.transcribe(audio_path)
+    
+    return {"text": result["text"]}
