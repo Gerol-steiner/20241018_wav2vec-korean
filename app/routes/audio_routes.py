@@ -1,5 +1,6 @@
 from fastapi import APIRouter, File, UploadFile
 import whisper
+import torch  # torchをインポート
 
 # APIRouterのインスタンスを作成
 router = APIRouter()

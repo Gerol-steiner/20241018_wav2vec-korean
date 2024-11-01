@@ -28,8 +28,13 @@ app.include_router(audio_routes.router)
 
 @app.get("/", response_class=HTMLResponse)  # HTMLResponseを指定
 async def read_index():
-    with open("app/static/index.html") as f:
-        return f.read()
+    try:
+        with open("app/static/index.html", encoding='utf-8') as f:  # エンコーディングを指定
+            return f.read()
+    except UnicodeDecodeError as e:
+        return {"error": "index.htmlをデコードできませんでした。ファイルのエンコーディングを確認してください。"}, 500
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 if __name__ == "__main__":
     import uvicorn
