@@ -47,11 +47,12 @@ function startSpeechRecognition() {
 
 // 音声認識結果の処理
 recognition.onresult = function(event) {
-    let transcript = Array.from(event.results)
-        .map(result => result[0].transcript)
-        .join('');
-    
+    const result = event.results[event.results.length - 1]; // 最後の結果を取得
+    const transcript = result[0].transcript; // 認識されたテキスト
+    const confidence = result[0].confidence; // 信頼度スコアを取得
+
     document.getElementById('transcriptionResult').textContent = transcript; // 結果を表示
+    document.getElementById('confidenceScore').textContent = `信頼度スコア: ${confidence}`; // 信頼度スコアを表示
 };
 
 // エラー処理
@@ -77,6 +78,13 @@ function sendAudioToServer() {
     })
     .then(response => {
         document.getElementById('transcriptionResult').textContent = response.data.text; // 結果を表示
+        
+        // 信頼度スコアを表示
+        if (response.data.confidence !== null) {
+            document.getElementById('confidenceScore').textContent = `信頼度スコア: ${response.data.confidence}`;
+        } else {
+            document.getElementById('confidenceScore').textContent = '信頼度スコアが取得できませんでした。';
+        }
     })
     .catch(error => {
         console.error('Error:', error);
