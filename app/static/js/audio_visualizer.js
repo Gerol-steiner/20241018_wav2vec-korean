@@ -2,9 +2,6 @@ let audioContext, analyser, dataArray;
 let volumeData = [];
 let startTime;
 let isRecordingVisualizer = false; // オーディオビジュアライザー用の録音状態
-let mediaRecorder;
-let audioChunks = [];
-let isRecordingSpeech = false; // 音声認識用の録音状態
 
 const speakButton = document.getElementById('speakButton');
 const graphDiv = document.getElementById('audioGraph');
