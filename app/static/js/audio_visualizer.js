@@ -1,16 +1,21 @@
 let audioContext, analyser, dataArray;
 let volumeData = [];
 let startTime;
-let isRecording = false;
-let recordingDuration = 3000; // 3秒 = 3000ミリ秒
+let isRecordingVisualizer = false; // オーディオビジュアライザー用の録音状態
+let mediaRecorder;
+let audioChunks = [];
+let isRecordingSpeech = false; // 音声認識用の録音状態
 
 const speakButton = document.getElementById('speakButton');
 const graphDiv = document.getElementById('audioGraph');
 
-speakButton.addEventListener('click', toggleRecording);
+speakButton.addEventListener('click', () => {
+    toggleRecording();
+    startSpeechRecognition(); // 音声認識も開始
+});
 
 function toggleRecording() {
-    if (isRecording) {
+    if (isRecordingVisualizer) {
         stopRecording();
     } else {
         startRecording();
@@ -18,7 +23,7 @@ function toggleRecording() {
 }
 
 function startRecording() {
-    isRecording = true;
+    isRecordingVisualizer = true;
     speakButton.textContent = 'Recording...';
     speakButton.disabled = true;
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -39,10 +44,10 @@ function startRecording() {
 
             // 3秒後に自動的に停止
             setTimeout(() => {
-                if (isRecording) {
+                if (isRecordingVisualizer) {
                     stopRecording();
                 }
-            }, recordingDuration);
+            }, 3000);
         })
         .catch(error => {
             console.error('Error accessing the microphone:', error);
@@ -52,7 +57,7 @@ function startRecording() {
 }
 
 function stopRecording() {
-    isRecording = false;
+    isRecordingVisualizer = false;
     speakButton.textContent = 'Speak';
     speakButton.disabled = false;
     if (audioContext) {
@@ -61,73 +66,42 @@ function stopRecording() {
 }
 
 function updateGraph() {
-    if (!isRecording && volumeData.length === 0) return;
+    if (!isRecordingVisualizer && volumeData.length === 0) return;
 
-    if (isRecording) {
+    if (isRecordingVisualizer) {
         analyser.getByteFrequencyData(dataArray);
         let volume = dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length / 255;
         let time = (Date.now() - startTime) / 1000;  // Convert to seconds
         volumeData.push({x: time, y: volume});
-    }
-
-    Plotly.newPlot(graphDiv, [{
-        x: volumeData.map(d => d.x),
-        y: volumeData.map(d => d.y),
-        type: 'scatter',
-        mode: 'lines',
-        line: {color: '#F148FB', width: 1}
-    }], {
-        title: 'Real-time Audio Volume',
-        xaxis: {
-            title: 'Time (s)',
-            range: [0, 3],  // 0〜3秒の範囲に固定
-            showgrid: true,
-            gridcolor: '#767474',
-            zeroline: false
-        },
-        yaxis: {
-            title: 'Volume',
-            range: [0, 0.4],
-            showgrid: true,
-            gridcolor: '#767474',
-            zeroline: false
-        },
-        plot_bgcolor: 'rgba(0,0,0,0)',  // 透明な背景
-        paper_bgcolor: 'rgba(0,0,0,0)', // 透明な背景
-        margin: {t: 50, r: 20, b: 50, l: 50},  // マージンの調整
-        font: {family: 'Arial, sans-serif'},   // フォントの設定
-    });
-
-    if (isRecording) {
+        
+        Plotly.newPlot(graphDiv, [{
+            x: volumeData.map(d => d.x),
+            y: volumeData.map(d => d.y),
+            type: 'scatter',
+            mode: 'lines',
+            line: {color: '#F148FB', width: 1}
+        }], {
+            title: 'Real-time Audio Volume',
+            xaxis: {
+                title: 'Time (s)',
+                range: [0, 3],  // 0〜3秒の範囲に固定
+                showgrid: true,
+                gridcolor: '#767474',
+                zeroline: false
+            },
+            yaxis: {
+                title: 'Volume',
+                range: [0, 0.4],
+                showgrid: true,
+                gridcolor: '#767474',
+                zeroline: false
+            },
+            plot_bgcolor: 'rgba(0,0,0,0)',  // 透明な背景
+            paper_bgcolor: 'rgba(0,0,0,0)', // 透明な背景
+            margin: {t: 50, r: 20, b: 50, l: 50},  // マージンの調整
+            font: {family: 'Arial, sans-serif'},   // フォントの設定
+        });
+        
         requestAnimationFrame(updateGraph);
     }
 }
-
-// 初期グラフの描画
-Plotly.newPlot(graphDiv, [{
-    x: [],
-    y: [],
-    type: 'scatter',
-    mode: 'lines',
-    line: {color: '#ff00ff', width: 1}
-}], {
-    title: 'Real-time Audio Volume',
-    xaxis: {
-        title: 'Time (s)',
-        range: [0, 3],
-        showgrid: true,
-        gridcolor: '#767474',
-        zeroline: false
-    },
-    yaxis: {
-        title: 'Volume',
-        range: [0, 0.4],
-        showgrid: true,
-        gridcolor: '#767474',
-        zeroline: false
-    },
-    plot_bgcolor: 'rgba(0,0,0,0)',
-    paper_bgcolor: 'rgba(0,0,0,0)',
-    margin: {t: 50, r: 20, b: 50, l: 50},
-    font: {family: 'Arial, sans-serif'},
-});
