@@ -6,7 +6,7 @@ let isRecognizing = false; // 音声認識状態を管理するフラグ
 // 音声認識の初期化
 const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 recognition.lang = 'ko-KR'; // 韓国語を指定
-recognition.interimResults = true; // 中間結果を取得するかどうか
+recognition.interimResults = false; // 中間結果を取得しない
 
 function startSpeechRecognition() {
     console.log("Attempting to start recognition...");
@@ -51,8 +51,9 @@ recognition.onresult = function(event) {
     const transcript = result[0].transcript; // 認識されたテキスト
     const confidence = result[0].confidence; // 信頼度スコアを取得
 
-    document.getElementById('transcriptionResult').textContent = transcript; // 結果を表示
-    document.getElementById('confidenceScore').textContent = `信頼度スコア: ${confidence}`; // 信頼度スコアを表示
+    // 中間結果を表示しないため、以下の行を削除
+    // document.getElementById('transcriptionResult').textContent = transcript; // 結果を表示
+    // document.getElementById('confidenceScore').textContent = `信頼度スコア: ${confidence}`; // 信頼度スコアを表示
 };
 
 // エラー処理
