@@ -19,6 +19,7 @@ function toggleRecording() {
     }
 }
 
+
 function startRecording() {
     isRecordingVisualizer = true;
     speakButton.textContent = 'Recording...';
@@ -41,7 +42,13 @@ function startRecording() {
             mediaRecorder.ondataavailable = (event) => {
                 audioChunks.push(event.data);
             };
-            mediaRecorder.onstop = sendAudioToServer; // 録音停止時にサーバーに送信
+            
+            // 録音停止時にサーバーに送信し、その後stopRecordingを呼び出す
+            mediaRecorder.onstop = () => {
+                sendAudioToServer(); // 録音停止時にサーバーに送信
+                stopRecording(); // 録音停止後にボタンの状態を元に戻す
+            };
+
             mediaRecorder.start();
 
             requestAnimationFrame(updateGraph);
@@ -62,12 +69,14 @@ function startRecording() {
 
 function stopRecording() {
     isRecordingVisualizer = false;
-    speakButton.textContent = 'Speak';
-    speakButton.disabled = false;
+    speakButton.textContent = 'Speak'; // ボタンを元に戻す
+    speakButton.disabled = false; // ボタンを再度有効にする
     if (audioContext) {
         audioContext.close();
     }
 }
+
+
 
 function updateGraph() {
     if (!isRecordingVisualizer && volumeData.length === 0) return;
@@ -75,10 +84,22 @@ function updateGraph() {
     if (isRecordingVisualizer) {
         analyser.getByteFrequencyData(dataArray);
         let volume = dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length / 255;
-        let time = (Date.now() - startTime) / 1000;  // Convert to seconds
+        let time = (Date.now() - startTime) / 1000;  // 秒に変換
         volumeData.push({x: time, y: volume});
-        
-        // グラフを更新する処理（省略）
+
+        // 3秒間のデータのみを保持
+        volumeData = volumeData.filter(data => data.x >= 0 && data.x <= 3);
+
+        // グラフを更新
+        Plotly.newPlot(graphDiv, [{
+            x: volumeData.map(data => data.x),
+            y: volumeData.map(data => data.y),
+            type: 'scatter'
+        }], {
+            title: 'Audio Volume Over Time',
+            xaxis: { title: 'Time (seconds)', range: [0, 3] }, // 横軸の範囲を0から3秒に固定
+            yaxis: { title: 'Volume (normalized)' }
+        });
 
         requestAnimationFrame(updateGraph);
     }
