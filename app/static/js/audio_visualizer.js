@@ -3,9 +3,11 @@ let volumeData = [];
 let startTime;
 let isRecordingVisualizer = false; // オーディオビジュアライザー用の録音状態
 let audioChunks = []; // 録音データを保存する配列
+let audioBlob; // 録音データを保存するための変数(自分の声の再生用)
 
 const speakButton = document.getElementById('speakButton');
 const graphDiv = document.getElementById('audioGraph');
+const playButton = document.getElementById('playButton');  // 再生ボタンの取得
 
 speakButton.addEventListener('click', () => {
     toggleRecording();
@@ -36,16 +38,16 @@ function startRecording() {
             dataArray = new Uint8Array(analyser.frequencyBinCount);
             volumeData = [];
             startTime = Date.now();
-            audioChunks = []; // 録音データを初期化
+            audioChunks = []; // ★ 録音データを初期化
 
             const mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.ondataavailable = (event) => {
-                audioChunks.push(event.data);
+                audioChunks.push(event.data); // ★ここで録音データを保存
             };
             
             // 録音停止時にサーバーに送信し、その後stopRecordingを呼び出す
             mediaRecorder.onstop = () => {
-                sendAudioToServer(); // 録音停止時にサーバーに送信
+                sendAudioToServer(); // ★ 録音停止時にサーバーに送信
                 stopRecording(); // 録音停止後にボタンの状態を元に戻す
             };
 
@@ -105,9 +107,8 @@ function updateGraph() {
     }
 }
 
-// 音声データをサーバーに送信
 function sendAudioToServer() {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); // 録音データを保存
     const formData = new FormData();
     formData.append('audio', audioBlob, 'speech.webm');
 
@@ -117,8 +118,18 @@ function sendAudioToServer() {
     })
     .then(response => {
         document.getElementById('transcriptionResult').textContent = response.data.text; // 結果を表示
+        playButton.disabled = false; // 録音されたデータがある場合、再生ボタンを有効にする
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
+
+// 再生ボタンのクリックイベント
+playButton.addEventListener('click', () => {
+    if (audioBlob) {
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play(); // 録音した音声を再生
+    }
+});

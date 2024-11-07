@@ -10,9 +10,15 @@
 
 <style>
     #audioGraph {
-        width: 100%;
+        width: 70%;
         height: 400px;
         /* 高さを指定 */
+    }
+
+    #transcriptionResult {
+        width: 300px;
+        height: 30px;
+        border: 1px solid black;
     }
 </style>
 
@@ -23,6 +29,7 @@
 <body>
     <h1>Audio Visualizer and Speech Recognition</h1>
     <button id="speakButton">Speak</button>
+    <button id="playButton" disabled>再生する</button>
     <div id="transcriptionResult"></div>
     <div id="audioGraph"></div> <!-- グラフ用のdiv -->
 
