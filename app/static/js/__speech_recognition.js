@@ -79,7 +79,7 @@ function sendAudioToServer() {
     })
     .then(response => {
         document.getElementById('transcriptionResult').textContent = response.data.text; // 結果を表示
-        
+
         // 信頼度スコアを表示
         if (response.data.confidence !== null) {
             document.getElementById('confidenceScore').textContent = `信頼度スコア: ${response.data.confidence}`;

@@ -2,13 +2,13 @@ let audioContext, analyser, dataArray;
 let volumeData = [];
 let startTime;
 let isRecordingVisualizer = false; // オーディオビジュアライザー用の録音状態
+let audioChunks = []; // 録音データを保存する配列
 
 const speakButton = document.getElementById('speakButton');
 const graphDiv = document.getElementById('audioGraph');
 
 speakButton.addEventListener('click', () => {
     toggleRecording();
-    startSpeechRecognition(); // 音声認識も開始
 });
 
 function toggleRecording() {
@@ -33,16 +33,23 @@ function startRecording() {
             
             analyser.fftSize = 256;
             dataArray = new Uint8Array(analyser.frequencyBinCount);
-            
             volumeData = [];
             startTime = Date.now();
-            
+            audioChunks = []; // 録音データを初期化
+
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+            mediaRecorder.onstop = sendAudioToServer; // 録音停止時にサーバーに送信
+            mediaRecorder.start();
+
             requestAnimationFrame(updateGraph);
 
             // 3秒後に自動的に停止
             setTimeout(() => {
                 if (isRecordingVisualizer) {
-                    stopRecording();
+                    mediaRecorder.stop();
                 }
             }, 3000);
         })
@@ -71,34 +78,26 @@ function updateGraph() {
         let time = (Date.now() - startTime) / 1000;  // Convert to seconds
         volumeData.push({x: time, y: volume});
         
-        Plotly.newPlot(graphDiv, [{
-            x: volumeData.map(d => d.x),
-            y: volumeData.map(d => d.y),
-            type: 'scatter',
-            mode: 'lines',
-            line: {color: '#F148FB', width: 1}
-        }], {
-            title: 'Real-time Audio Volume',
-            xaxis: {
-                title: 'Time (s)',
-                range: [0, 3],  // 0〜3秒の範囲に固定
-                showgrid: true,
-                gridcolor: '#767474',
-                zeroline: false
-            },
-            yaxis: {
-                title: 'Volume',
-                range: [0, 0.4],
-                showgrid: true,
-                gridcolor: '#767474',
-                zeroline: false
-            },
-            plot_bgcolor: 'rgba(0,0,0,0)',  // 透明な背景
-            paper_bgcolor: 'rgba(0,0,0,0)', // 透明な背景
-            margin: {t: 50, r: 20, b: 50, l: 50},  // マージンの調整
-            font: {family: 'Arial, sans-serif'},   // フォントの設定
-        });
-        
+        // グラフを更新する処理（省略）
+
         requestAnimationFrame(updateGraph);
     }
+}
+
+// 音声データをサーバーに送信
+function sendAudioToServer() {
+    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'speech.webm');
+
+    // FastAPIエンドポイントにPOSTリクエスト
+    axios.post('http://localhost:8000/transcribe', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    .then(response => {
+        document.getElementById('transcriptionResult').textContent = response.data.text; // 結果を表示
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
