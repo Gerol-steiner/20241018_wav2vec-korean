@@ -1,13 +1,14 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, BackgroundTasks
+from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from gtts import gTTS
-import io
 import whisper
 import os
 import tempfile  # 一時ファイルを扱うためのライブラリをインポート
 
 # APIRouterのインスタンスを作成
+# APIルーターを管理するためのオブジェクト
+# ここにルート（エンドポイント）を定義し、「main.py」のFastAPIアプリに追加
 router = APIRouter()
 
 # Whisperモデルのロード
