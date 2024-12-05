@@ -2,9 +2,11 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from gtts import gTTS
+from jamo import h2j, hangul_to_jamo  # ハングルを音素に分解する
 import whisper
 import os
 import tempfile  # 一時ファイルを扱うためのライブラリをインポート
+
 
 # APIRouterのインスタンスを作成
 # APIルーターを管理するためのオブジェクト
@@ -15,7 +17,7 @@ router = APIRouter()
 model = whisper.load_model("base")  # モデル名は必要に応じて変更する
 
 @router.post("/transcribe")
-async def transcribe(audio: UploadFile = File(...)):
+async def transcribe(audio: UploadFile = File(...)): # 引数名を「audio」とする
     audio_path = "temp_audio.webm"
 
     try:
@@ -25,13 +27,20 @@ async def transcribe(audio: UploadFile = File(...)):
 
         # Whisperによる音声認識（韓国語を指定）
         result = model.transcribe(audio_path, language='ko')
+        text = result["text"].replace(" ", "")  # 空白を削除
+
+        # 音素分解
+        phonemes = list(hangul_to_jamo(text))
+
 
         # 認識結果のテキストと認識した言語を表示
         print("認識結果:", result["text"])
         print("認識した言語:", result["language"])  # 言語情報を表示
+        print("音素に分解:", phonemes) 
 
         return {
             "text": result["text"],
+            "phonemes": phonemes  # 音素分解結果
         }
 
     except Exception as e:
@@ -41,6 +50,10 @@ async def transcribe(audio: UploadFile = File(...)):
         # 一時ファイルを削除
         if os.path.exists(audio_path):
             os.remove(audio_path)
+
+
+
+
 
 class TextRequest(BaseModel):
     text: str  # テキストフィールドを持つPydanticモデル

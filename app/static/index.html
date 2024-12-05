@@ -38,8 +38,16 @@
     <button id="readButton">読み上げ</button> <!-- 読み上げボタンを追加 -->
     <button id="nextWordButton">次の単語を表示</button> <!-- 次の単語ボタン -->
 
+
+    <!-- 音素分解結果の表示エリア -->
+    <div id="phonemeDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
+        <h3>音素分解結果</h3>
+        <p id="phonemeText">ここに音素分解結果が表示されます。</p>
+    </div>
+
     <script src="/static/js/audio_visualizer.js"></script>
     <script src="/static/js/word_quiz.js"></script> <!-- word_quiz.jsを追加 -->
+    <script src="/static/js/phoneme_comparator.js"></script>
 </body>
 
 </html>
