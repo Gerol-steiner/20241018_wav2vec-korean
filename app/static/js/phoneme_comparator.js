@@ -195,47 +195,48 @@ function setupEvaluateButton() {
     evaluateButton.addEventListener('click', () => {
         console.log('評価するボタンがクリックされました');
 
-        // 出題テキストの音素分解結果を取得
-        const { filteredPhonemes: questionPhonemes } = decomposeQuestionTextToPhonemes();
-        console.log('出題音素分解結果:', questionPhonemes);
-
-        if (!questionPhonemes.length) {
-            console.error('出題音素分解結果が空です');
-            alert("出題テキストの音素分解に問題があります。");
+        // 出題テキストを取得（ハングル文字単位）
+        const questionTextElement = document.getElementById('wordDisplay');
+        if (!questionTextElement || questionTextElement.textContent.trim() === '') {
+            console.error("出題テキストが見つかりません！");
+            alert("出題テキストが設定されていません！");
             return;
         }
+        const questionText = questionTextElement.textContent.trim();
+        console.log('出題テキスト:', questionText);
 
-        // ユーザー音声認識結果を取得
+        // ユーザー音声認識結果を取得（ハングル文字単位）
         const phonemeTextElement = document.getElementById('phonemeText');
         if (!phonemeTextElement || phonemeTextElement.textContent.trim() === '') {
             console.error("ユーザー音声認識結果が見つかりません！");
             alert("ユーザー音声認識結果がありません！");
             return;
         }
+        const userTextMatch = phonemeTextElement.textContent.match(/ユーザー音声認識結果:\s(.+)/);
+        const userText = userTextMatch ? userTextMatch[1].trim() : '';
 
-        const userPhonemeText = phonemeTextElement.textContent.match(/音素分解:\s(.+)/);
-        let userPhonemes = userPhonemeText ? userPhonemeText[1].trim().split(' ') : [];
+        console.log('ユーザー音声認識結果:', userText);
 
-        console.log('ユーザー音素分解結果:', userPhonemes);
-
-        if (!userPhonemes.length) {
-            console.error("ユーザー音素分解が空です！");
-            alert("ユーザー音声認識結果の音素が正しく抽出されませんでした！");
+        if (!userText) {
+            console.error("ユーザー音声認識結果が空です！");
+            alert("ユーザー音声認識結果が取得できませんでした！");
             return;
         }
 
-        // 発音評価を実行
+        // 発音評価は音素を用いて実行
+        const { filteredPhonemes: questionPhonemes } = decomposeQuestionTextToPhonemes();
+        const userPhonemeTextMatch = phonemeTextElement.textContent.match(/音素分解:\s(.+)/);
+        const userPhonemes = userPhonemeTextMatch ? userPhonemeTextMatch[1].trim().split(' ') : [];
+        console.log('音素による発音評価を実行: ユーザー音素:', userPhonemes, '出題音素:', questionPhonemes);
         displayEvaluation(userPhonemes, questionPhonemes);
 
-        // 逐文字比較結果を計算して表示
-        const userText = userPhonemes.join('');
-        const questionText = questionPhonemes.join('');
+        // 逐文字比較はハングル文字単位で実行
         const comparisonResult = compareTextsBasedOnUserInput(userText, questionText);
-
         console.log('逐文字比較結果:', comparisonResult);
-        displayTextComparisonResult(comparisonResult); // 逐文字比較結果をビューに反映
+        displayTextComparisonResult(comparisonResult);
     });
 }
+
 
 
 // 挿入された音素、削除された音素、置換された音素を表示する
@@ -328,30 +329,35 @@ document.addEventListener('DOMContentLoaded', () => {
 // ユーザー音声認識結果と出題テキストを逐文字比較
 function compareTextsBasedOnUserInput(userText, questionText) {
     const comparisonResult = [];
-    const remainingQuestionText = [...questionText]; // 出題テキストを配列に変換
+    const questionChars = [...questionText].filter(char => !['.', '?', '!', ','].includes(char)); // 出題テキストの句読点を除外
+    const userChars = [...userText].filter(char => !['.', '?', '!', ','].includes(char)); // ユーザー音声認識結果の句読点を除外
 
-    userText.split('').forEach((userChar, index) => {
-        if (remainingQuestionText.length > 0 && remainingQuestionText[0] === userChar) {
-            // 一致する場合、緑色で表示
+    userChars.forEach(userChar => {
+        if (questionChars.length > 0 && questionChars[0] === userChar) {
+            // 完全一致の場合、緑色で表示
             comparisonResult.push({ char: userChar, correct: true });
-            remainingQuestionText.shift(); // 先頭を削除
+            questionChars.shift(); // 一致した文字を削除
+        } else if (questionChars.includes(userChar)) {
+            // 出題テキスト内に存在する場合も緑色で表示
+            comparisonResult.push({ char: userChar, correct: true });
+            questionChars.splice(questionChars.indexOf(userChar), 1); // 該当文字を削除
         } else {
             // 一致しない場合、赤色で表示
             comparisonResult.push({ char: userChar, correct: false });
         }
     });
 
-    // 出題テキストに残った文字を赤色で追加
-    remainingQuestionText.forEach(remainingChar => {
-        comparisonResult.push({ char: remainingChar, correct: false });
+    // 残った出題テキスト（不足部分）を赤色で表示
+    questionChars.forEach(remainingChar => {
+        comparisonResult.push({ char: `(${remainingChar})`, correct: false, isInsert: true });
     });
-
-    // デバッグ用ログを追加
-    console.log('逐文字比較結果:', comparisonResult);
-    console.log('残った出題テキスト:', remainingQuestionText);
 
     return comparisonResult;
 }
+
+
+
+
 
 
 
@@ -368,9 +374,14 @@ function displayTextComparisonResult(comparisonResult) {
     // 結果をHTMLに描画
     resultContainer.innerHTML = comparisonResult
         .map(result => {
+            if (result.isInsert) {
+                // 挿入が必要な場合は赤い括弧付きで表示
+                return `<span style="color: red;">${result.char}</span>`;
+            }
             return result.correct
-                ? `<span style="color: green;">${result.char}</span>`
-                : `<span style="color: red;">${result.char}</span>`;
+                ? `<span style="color: green;">${result.char}</span>` // 一致する文字を緑
+                : `<span style="color: red;">${result.char}</span>`;  // 不一致の文字を赤
         })
         .join('');
 }
+
