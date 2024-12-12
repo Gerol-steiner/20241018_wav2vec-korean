@@ -53,12 +53,20 @@ function displayEvaluation(transcribedPhonemes, questionPhonemes) {
     console.log('出題音素:', questionPhonemes);
 
     const resultDisplay = document.getElementById('evaluationText');
+    const matchPercentageDisplay = document.getElementById('matchPercentageText'); // 一致率の表示用タグ
+
     if (!resultDisplay) {
         console.error('evaluationText 要素が見つかりません。');
         return;
     }
 
+    if (!matchPercentageDisplay) {
+        console.error('matchPercentageText 要素が見つかりません。');
+        return;
+    }
+
     console.log('evaluationText 要素が見つかりました:', resultDisplay);
+    console.log('matchPercentageText 要素が見つかりました:', matchPercentageDisplay);
 
     const {
         distance,
@@ -74,16 +82,21 @@ function displayEvaluation(transcribedPhonemes, questionPhonemes) {
     console.log('一致率:', matchPercentage);
 
     try {
+        // 既存の詳細情報を更新
         resultDisplay.innerHTML = `
             <strong>編集回数:</strong> ${distance}<br>
             <strong>音素列長:</strong> 出題(${questionPhonemes.length}), ユーザー(${transcribedPhonemes.length})<br>
             <strong>編集距離:</strong> ${distance}<br>
             <strong>編集距離の内訳:</strong> 挿入(${operations.insertions}), 削除(${operations.deletions}), 置換(${operations.substitutions})<br>
-            <strong>一致率:</strong> ${matchPercentage}%
         `;
+
+        // 一致率を別タグに設定
+        matchPercentageDisplay.textContent = `一致率: ${matchPercentage}%`;
+
         console.log('評価結果がevaluationTextに設定されました。');
+        console.log('一致率がmatchPercentageTextに設定されました。');
     } catch (error) {
-        console.error('evaluationTextへの結果設定中にエラー:', error);
+        console.error('評価結果の設定中にエラー:', error);
     }
 
     const details = {
@@ -95,6 +108,7 @@ function displayEvaluation(transcribedPhonemes, questionPhonemes) {
     console.log('発音評価の詳細:', details);
     displayPhonemeDetails(details); // 編集距離の詳細を表示
 }
+
 
 
 

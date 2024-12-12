@@ -10,8 +10,11 @@
     <script src="https://cdn.jsdelivr.net/npm/jamo"></script>
 
 <style>
+    body {
+        background-color: rgb(162, 162, 162);
+    }
     #audioGraph {
-        width: 40%;
+        width: 30%;
         height: 300px;
         /* 高さを指定 */
     }
@@ -47,6 +50,11 @@
         <p>ここに逐文字比較結果が表示されます。</p>
     </div>
 
+    <div>
+        <h3>一致率</h3>
+        <p id="matchPercentageText">ここに一致率が表示されます。</p>
+    </div>
+
 
     <!-- 音素分解結果の表示エリア -->
     <div id="phonemeDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
@@ -65,6 +73,7 @@
         <h3>ユーザー音声の発音評価</h3>
         <p id="evaluationText">ここに発音評価が表示されます。</p>
     </div>
+
 
 
     <div id="phonemeDetails" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">

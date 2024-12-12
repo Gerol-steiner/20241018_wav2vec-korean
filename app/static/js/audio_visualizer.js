@@ -99,11 +99,24 @@ function updateGraph() {
         Plotly.newPlot(graphDiv, [{
             x: volumeData.map(data => data.x),
             y: volumeData.map(data => data.y),
-            type: 'scatter'
+            type: 'line'
         }], {
-            title: 'Audio Volume Over Time',
-            xaxis: { title: 'Time (seconds)', range: [0, 3] }, // 横軸の範囲を0から3秒に固定
-            yaxis: { title: 'Volume (normalized)' }
+            title: '', // グラフタイトルを非表示
+            xaxis: {
+                title: '', // X軸ラベルを非表示
+                range: [0, 3], // 横軸の範囲を0〜3秒に固定
+                showticklabels: false, // X軸のメモリを非表示
+                showgrid: false, // X軸のグリッド線を非表示
+                visible: false // X軸を完全に非表示
+            },
+            yaxis: {
+                title: '', // Y軸ラベルを非表示
+                showticklabels: false, // Y軸のメモリを非表示
+                showgrid: false, // Y軸のグリッド線を非表示
+                visible: false // Y軸を完全に非表示
+            },
+            paper_bgcolor: 'rgba(0,0,0,0)', // グラフ外部の背景を透明にする
+            plot_bgcolor: 'rgba(0,0,0,0)'  // グラフ内部の背景を透明にする
         });
         // 次回の画面再描画タイミングで updateGraph 関数を再実行
         // これにより、グラフがリアルタイムで更新され続ける
