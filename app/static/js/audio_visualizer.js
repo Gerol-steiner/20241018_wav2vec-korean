@@ -117,6 +117,8 @@ function updateGraph() {
             },
             paper_bgcolor: 'rgba(0,0,0,0)', // グラフ外部の背景を透明にする
             plot_bgcolor: 'rgba(0,0,0,0)'  // グラフ内部の背景を透明にする
+        }, {
+            displayModeBar: false // ツールバーメニューを非表示にする
         });
         // 次回の画面再描画タイミングで updateGraph 関数を再実行
         // これにより、グラフがリアルタイムで更新され続ける

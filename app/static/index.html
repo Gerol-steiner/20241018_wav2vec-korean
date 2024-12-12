@@ -15,15 +15,10 @@
     }
     #audioGraph {
         width: 30%;
-        height: 300px;
+        height: 200px;
         /* 高さを指定 */
     }
 
-    #transcriptionResult {
-        width: 300px;
-        height: 30px;
-        border: 1px solid black;
-    }
 </style>
 
 </head>
@@ -64,17 +59,7 @@
 
 
 
-    <!-- 音素分解結果の表示エリア -->
-    <div id="phonemeDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-        <h3>音素分解結果</h3>
-        <p id="phonemeText">ここに音素分解結果が表示されます。</p>
-    </div>
 
-    <!-- 出題テキストの音素分解結果を表示するエリア -->
-    <div id="questionPhonemeDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-        <h3>出題テキストの音素分解結果</h3>
-        <p id="questionPhonemeText">ここに出題テキストの音素分解結果が表示されます。</p>
-    </div>
 
     <!-- ユーザー音声の発音評価エリア -->
     <div id="evaluationDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
@@ -92,9 +77,21 @@
     </div>
 
 
+    <!-- 【ここから下は非表示エリア】 ※消去することでエラーとなるので、消去不可※ -->
 
+        <!-- 音素分解結果の表示エリア -->
+    <div id="phonemeDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000; display: none;">
+        <h3>音素分解結果</h3>
+        <p id="phonemeText">ここに音素分解結果が表示されます。</p>
+    </div>
 
-    <div id="transcriptionResult"></div>
+    <!-- 出題テキストの音素分解結果を表示するエリア -->
+    <div id="questionPhonemeDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000; display: none;">
+        <h3>出題テキストの音素分解結果</h3>
+        <p id="questionPhonemeText">ここに出題テキストの音素分解結果が表示されます。</p>
+    </div>
+
+    <div id="transcriptionResult" style="display: none;"></div>
 
 
     <script src="https://unpkg.com/jamo"></script>
