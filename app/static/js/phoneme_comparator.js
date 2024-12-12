@@ -325,6 +325,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEvaluateButton();
 });
 
+
+// 出題テキストを音素に分解する関数
+function decomposeAndDisplayQuestionText() {
+    const questionTextElement = document.getElementById('wordDisplay');
+    const questionPhonemeTextElement = document.getElementById('questionPhonemeText');
+
+    if (!questionTextElement || !questionTextElement.textContent.trim()) {
+        console.error("出題テキストが設定されていません。");
+        return;
+    }
+
+    const questionText = questionTextElement.textContent.trim();
+    const decomposedPhonemes = decomposeQuestionTextToPhonemes(questionText); // 既存の分解ロジックを利用
+
+    // 結果を表示
+    questionPhonemeTextElement.textContent = `音素分解: ${decomposedPhonemes.filteredPhonemes.join(' ')}`;
+    console.log('出題テキストの音素分解結果を表示しました:', decomposedPhonemes);
+}
+
+
 // ユーザー音声認識結果と出題テキストを逐文字比較
 function compareTextsBasedOnUserInput(userText, questionText) {
     const comparisonResult = [];

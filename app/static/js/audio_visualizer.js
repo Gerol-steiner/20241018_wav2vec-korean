@@ -129,6 +129,9 @@ function sendAudioToServer() {
         const { text, phonemes } = response.data;
         displayPhonemes(text, phonemes);
 
+        // 出題テキストの音素分解を自動実行
+        decomposeAndDisplayQuestionText();
+
         // 再生ボタンを有効化
         if (audioBlob.size > 0) {
             playButton.disabled = false; // 再生ボタンを有効にする
@@ -141,6 +144,7 @@ function sendAudioToServer() {
         alert('サーバーに音声データを送信できませんでした。');
     });
 }
+
 
 
 
