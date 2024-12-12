@@ -114,6 +114,15 @@ function displayEvaluation(transcribedPhonemes, questionPhonemes) {
 
 // 編集距離を計算し、内訳を返す関数
 function calculateLevenshteinDistance(a, b) {
+    // 入力データの整合性チェック
+    if (!Array.isArray(a) || !Array.isArray(b)) {
+        throw new Error('Input must be arrays of phonemes');
+    }
+
+    console.log('ユーザー音素:', a);
+    console.log('出題音素:', b);
+
+    // 動的計画法テーブルの初期化
     const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
     const operations = { insertions: 0, deletions: 0, substitutions: 0 };
 
@@ -122,6 +131,7 @@ function calculateLevenshteinDistance(a, b) {
 
     const operationTable = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(null));
 
+    // DPテーブルの計算
     for (let i = 1; i <= a.length; i++) {
         for (let j = 1; j <= b.length; j++) {
             if (a[i - 1] === b[j - 1]) {
@@ -146,6 +156,7 @@ function calculateLevenshteinDistance(a, b) {
         }
     }
 
+    // 編集操作の追跡
     let i = a.length, j = b.length;
     const insertedPhonemes = [];
     const deletedPhonemes = [];
@@ -171,6 +182,12 @@ function calculateLevenshteinDistance(a, b) {
         }
     }
 
+    // 編集距離と操作のログ出力
+    console.log('編集距離:', dp[a.length][b.length]);
+    console.log('挿入操作:', insertedPhonemes);
+    console.log('削除操作:', deletedPhonemes);
+    console.log('置換操作:', substitutedPhonemes);
+
     return {
         distance: dp[a.length][b.length],
         operations,
@@ -179,6 +196,7 @@ function calculateLevenshteinDistance(a, b) {
         substitutedPhonemes,
     };
 }
+
 
 
 
@@ -411,11 +429,90 @@ function evaluateUserInput() {
         console.warn("出題テキストの音素が不足しているため、発音評価をスキップします。");
     }
 
+    // 音素比較結果を表示
+    displayPhonemeComparison(userPhonemes, questionPhonemes);
+
     // 逐文字比較
     const comparisonResult = compareTextsBasedOnUserInput(userText, document.getElementById('wordDisplay').textContent.trim());
     displayTextComparisonResult(comparisonResult, document.getElementById('wordDisplay').textContent.trim());
 }
 
 
+
+
+
+function comparePhonemes(userPhonemes, questionPhonemes) {
+    const userResult = [];
+    const questionResult = [];
+    const maxLength = Math.max(userPhonemes.length, questionPhonemes.length);
+
+    let userIndex = 0;
+    let questionIndex = 0;
+
+    for (let i = 0; i < maxLength; i++) {
+        const userPhoneme = userPhonemes[userIndex] || '';
+        const questionPhoneme = questionPhonemes[questionIndex] || '';
+
+        if (userPhoneme && questionPhoneme && userPhoneme === questionPhoneme) {
+            // 一致する音素
+            userResult.push({ phoneme: userPhoneme, correct: true });
+            questionResult.push({ phoneme: questionPhoneme, correct: true });
+            userIndex++;
+            questionIndex++;
+        } else if (userPhoneme && (!questionPhoneme || userPhoneme !== questionPhoneme)) {
+            // ユーザーの音素が正解に含まれない（不一致）
+            userResult.push({ phoneme: userPhoneme, correct: false });
+            if (questionPhoneme) {
+                questionResult.push({ phoneme: questionPhoneme, correct: false });
+            }
+            userIndex++;
+            questionIndex++;
+        } else if (!userPhoneme && questionPhoneme) {
+            // 出題テキストに余る音素
+            questionResult.push({ phoneme: questionPhoneme, correct: false });
+            questionIndex++;
+        } else if (userPhoneme && !questionPhoneme) {
+            // ユーザー音素に余る場合
+            userResult.push({ phoneme: userPhoneme, correct: false });
+            userIndex++;
+        }
+    }
+
+    return { userResult, questionResult };
+}
+
+
+function displayPhonemeComparison(userPhonemes, questionPhonemes) {
+    console.log('displayPhonemeComparison 呼び出し');
+    console.log('ユーザー音素:', userPhonemes);
+    console.log('出題音素:', questionPhonemes);
+
+    if (!userPhonemes.length || !questionPhonemes.length) {
+        console.error('音素分解結果が不足しています。');
+        return;
+    }
+
+    const { userResult, questionResult } = comparePhonemes(userPhonemes, questionPhonemes);
+
+    const userDisplay = userResult.map(result =>
+        `<span style="color: ${result.correct ? 'green' : 'red'};">${result.phoneme}</span>`
+    ).join(' ');
+
+    const questionDisplay = questionResult.map(result =>
+        `<span style="color: ${result.correct ? 'black' : 'red'};">${result.phoneme}</span>`
+    ).join(' ');
+
+    const userPhonemeElement = document.getElementById('userPhonemeComparison');
+    const questionPhonemeElement = document.getElementById('questionPhonemeComparison');
+
+    if (!userPhonemeElement || !questionPhonemeElement) {
+        console.error('HTML要素が見つかりません。');
+        return;
+    }
+
+    userPhonemeElement.innerHTML = `ユーザー音声認識結果の音素分解: ${userDisplay}`;
+    questionPhonemeElement.innerHTML = `出題テキストの音素分解: ${questionDisplay}`;
+    console.log('音素比較結果を更新しました。');
+}
 
 
