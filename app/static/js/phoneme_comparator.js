@@ -230,10 +230,9 @@ function setupEvaluateButton() {
         console.log('音素による発音評価を実行: ユーザー音素:', userPhonemes, '出題音素:', questionPhonemes);
         displayEvaluation(userPhonemes, questionPhonemes);
 
-        // 逐文字比較はハングル文字単位で実行
+        // 逐文字比較を実行
         const comparisonResult = compareTextsBasedOnUserInput(userText, questionText);
-        console.log('逐文字比較結果:', comparisonResult);
-        displayTextComparisonResult(comparisonResult);
+        displayTextComparisonResult(comparisonResult, questionText);
     });
 }
 
@@ -364,24 +363,50 @@ function compareTextsBasedOnUserInput(userText, questionText) {
 
 
 // 逐文字比較結果をHTMLに表示
-function displayTextComparisonResult(comparisonResult) {
+function displayTextComparisonResult(comparisonResult, questionText) {
     const resultContainer = document.getElementById('sequentialComparisonResult');
     if (!resultContainer) {
         console.error('sequentialComparisonResult 要素が見つかりません。');
         return;
     }
 
-    // 結果をHTMLに描画
-    resultContainer.innerHTML = comparisonResult
+    // questionTextが文字列かどうか確認
+    if (typeof questionText !== 'string') {
+        console.error('questionText が文字列ではありません:', questionText);
+        return;
+    }
+
+    // ユーザー音声認識結果の表示を構築
+    const userTextDisplay = comparisonResult
+        .filter(result => !result.isInsert) // 挿入部分は除外
         .map(result => {
-            if (result.isInsert) {
-                // 挿入が必要な場合は赤い括弧付きで表示
-                return `<span style="color: red;">${result.char}</span>`;
-            }
             return result.correct
-                ? `<span style="color: green;">${result.char}</span>` // 一致する文字を緑
-                : `<span style="color: red;">${result.char}</span>`;  // 不一致の文字を赤
+                ? `<span style="color: green;">${result.char}</span>` // 一致部分を緑
+                : `<span style="color: red;">${result.char}</span>`;  // 不一致部分を赤
         })
         .join('');
+
+    // 出題テキストの不足部分を赤で表示
+    const questionTextDisplay = Array.from(questionText) // 配列に変換
+        .map(char => {
+            const isMissing = comparisonResult.some(
+                result => result.isInsert && result.char.replace(/[()]/g, '') === char
+            );
+            return isMissing
+                ? `<span style="color: red;">${char}</span>` // 不足部分を赤で表示
+                : char; // それ以外は黒
+        })
+        .join('');
+
+    // タイトルを保持したまま結果を更新
+    resultContainer.innerHTML = `
+        <h3>逐文字比較結果</h3>
+        <div>ユーザー音声認識結果: ${userTextDisplay}</div>
+        <div>出題テキスト: ${questionTextDisplay}</div>
+    `;
 }
+
+
+
+
 
