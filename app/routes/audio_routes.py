@@ -17,7 +17,7 @@ router = APIRouter()
 model = whisper.load_model("base")  # モデル名は必要に応じて変更する
 
 @router.post("/transcribe")
-async def transcribe(audio: UploadFile = File(...)): # 引数名を「audio」とする
+async def transcribe(audio: UploadFile = File(...)): 
     audio_path = "temp_audio.webm"
 
     try:
@@ -35,25 +35,23 @@ async def transcribe(audio: UploadFile = File(...)): # 引数名を「audio」�
         # フィルタリングして不要な記号を除去
         phonemes = [phoneme for phoneme in raw_phonemes if phoneme not in ['?', '!', '.', ',']]
 
-
-        # 認識結果のテキストと認識した言語を表示
-        print("認識結果:", result["text"])
-        print("認識した言語:", result["language"])  # 言語情報を表示
-        print("音素に分解（フィルタリング前）:", raw_phonemes)
-        print("音素に分解（フィルタリング後）:", phonemes)
+        # 音素分解が空の場合のフォールバック処理
+        if not phonemes:
+            print("音素分解結果が空です。適切な音声が提供されなかった可能性があります。")
+            phonemes = ["N/A"]  # デフォルトの値を設定
 
         return {
             "text": result["text"],
-            "phonemes": phonemes  # 音素分解結果（フィルタリング後）：ブラウザの「ユーザー音声認識結果の音素分解」として表示される
+            "phonemes": phonemes
         }
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
     finally:
-        # 一時ファイルを削除
         if os.path.exists(audio_path):
             os.remove(audio_path)
+
 
 
 

@@ -427,6 +427,49 @@ function displayTextComparisonResult(comparisonResult, questionText) {
 }
 
 
+function evaluateUserInput() {
+    console.log('evaluateUserInput 関数が呼び出されました');
+
+    // 出題テキストの音素分解結果を取得
+    const { filteredPhonemes: questionPhonemes } = decomposeQuestionTextToPhonemes();
+
+    const transcriptionResultElement = document.getElementById('transcriptionResult');
+    if (!transcriptionResultElement || !transcriptionResultElement.textContent.trim()) {
+        console.error("ユーザー音声認識結果が見つかりません！");
+        alert("ユーザー音声認識結果がありません！");
+        return;
+    }
+
+    const userText = transcriptionResultElement.textContent.trim();
+    console.log('ユーザー音声認識結果:', userText);
+
+    // Whisperレスポンスの音素分解結果を取得
+    const phonemeTextElement = document.getElementById('phonemeText');
+    let userPhonemes = [];
+    try {
+        const phonemesMatch = phonemeTextElement.textContent.match(/音素分解:\s(.+)/);
+        userPhonemes = phonemesMatch ? phonemesMatch[1].trim().split(' ') : [];
+        if (!userPhonemes.length) {
+            throw new Error("音素分解が空です。");
+        }
+    } catch (error) {
+        console.warn("音素分解中にエラーが発生しました:", error);
+    }
+
+    console.log('ユーザー音素:', userPhonemes);
+
+    // 発音評価（音素が空でも続行）
+    if (questionPhonemes.length > 0) {
+        displayEvaluation(userPhonemes, questionPhonemes);
+    } else {
+        console.warn("出題テキストの音素が不足しているため、発音評価をスキップします。");
+    }
+
+    // 逐文字比較
+    const comparisonResult = compareTextsBasedOnUserInput(userText, document.getElementById('wordDisplay').textContent.trim());
+    displayTextComparisonResult(comparisonResult, document.getElementById('wordDisplay').textContent.trim());
+}
+
 
 
 
