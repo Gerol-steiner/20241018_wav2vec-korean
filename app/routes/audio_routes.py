@@ -30,17 +30,21 @@ async def transcribe(audio: UploadFile = File(...)): # 引数名を「audio」�
         text = result["text"].replace(" ", "")  # 空白を削除
 
         # 音素分解
-        phonemes = list(hangul_to_jamo(text))
+        raw_phonemes = list(hangul_to_jamo(text))
+
+        # フィルタリングして不要な記号を除去
+        phonemes = [phoneme for phoneme in raw_phonemes if phoneme not in ['?', '!', '.', ',']]
 
 
         # 認識結果のテキストと認識した言語を表示
         print("認識結果:", result["text"])
         print("認識した言語:", result["language"])  # 言語情報を表示
-        print("音素に分解:", phonemes) 
+        print("音素に分解（フィルタリング前）:", raw_phonemes)
+        print("音素に分解（フィルタリング後）:", phonemes)
 
         return {
             "text": result["text"],
-            "phonemes": phonemes  # 音素分解結果
+            "phonemes": phonemes  # 音素分解結果（フィルタリング後）：ブラウザの「ユーザー音声認識結果の音素分解」として表示される
         }
 
     except Exception as e:
