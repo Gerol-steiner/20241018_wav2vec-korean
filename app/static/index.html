@@ -11,8 +11,8 @@
 
 <style>
     #audioGraph {
-        width: 70%;
-        height: 400px;
+        width: 40%;
+        height: 300px;
         /* 高さを指定 */
     }
 
@@ -29,18 +29,23 @@
 
 <body>
     <h1>Audio Visualizer and Speech Recognition</h1>
-    <button id="speakButton">Speak</button>
-    <button id="playButton" disabled>再生する</button>
-    <div id="transcriptionResult"></div>
-    <div id="audioGraph"></div> <!-- グラフ用のdiv -->
 
     <!-- 単語表示エリア -->
     <div id="wordDisplay" style="font-size: 2em; margin: 20px;"></div> <!-- 単語表示エリア -->
     <button id="readButton">読み上げ</button> <!-- 読み上げボタンを追加 -->
     <button id="nextWordButton">次の単語を表示</button> <!-- 次の単語ボタン -->
 
-    <!-- 出題テキストを音素に分解するボタンを追加 -->
-    <button id="decomposeTextButton">出題テキストを音素に分解</button>
+
+
+    <button id="speakButton">Speak</button>
+    <button id="playButton" disabled>自分の声を確認する</button>
+
+    <div id="audioGraph"></div> <!-- グラフ用のdiv -->
+
+    <div id="sequentialComparisonResult" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
+        <h3>逐文字比較結果</h3>
+        <p>ここに逐文字比較結果が表示されます。</p>
+    </div>
 
 
     <!-- 音素分解結果の表示エリア -->
@@ -58,7 +63,6 @@
     <!-- ユーザー音声の発音評価エリア -->
     <div id="evaluationDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
         <h3>ユーザー音声の発音評価</h3>
-        <button id="evaluateButton">評価する</button>
         <p id="evaluationText">ここに発音評価が表示されます。</p>
     </div>
 
@@ -70,13 +74,10 @@
         <p><strong>置換された音素:</strong> <span id="substitutedPhonemes">ここに置換された音素が表示されます。</span></p>
     </div>
 
-    <div id="sequentialComparisonResult" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-        <h3>逐文字比較結果</h3>
-        <p>ここに逐文字比較結果が表示されます。</p>
-    </div>
 
 
 
+    <div id="transcriptionResult"></div>
 
 
     <script src="https://unpkg.com/jamo"></script>

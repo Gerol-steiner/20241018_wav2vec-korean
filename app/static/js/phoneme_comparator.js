@@ -1,5 +1,6 @@
 // サーバーから音素分解結果を取得してHTMLに表示
-function displayPhonemes(transcribedText, transcribedPhonemes) {
+// サーバーから音素分解結果を取得してHTMLに表示
+function displayPhonemes(_, transcribedPhonemes) { // 第1引数を使わない場合はアンダースコアを使用
     const phonemeText = document.getElementById('phonemeText');
     if (!phonemeText) {
         console.error('phonemeText 要素が見つかりません。');
@@ -8,11 +9,8 @@ function displayPhonemes(transcribedText, transcribedPhonemes) {
 
     console.log('音素分解結果を表示する要素が見つかりました:', phonemeText);
 
-    // 音素分解結果をフォーマットして表示
-    phonemeText.textContent = `
-        ユーザー音声認識結果: ${transcribedText}
-        ユーザー音声認識結果の音素分解: ${transcribedPhonemes.join(' ')}
-    `.trim();
+    // 音素分解結果のみをフォーマットして表示
+    phonemeText.textContent = `ユーザー音声認識結果の音素分解: ${transcribedPhonemes.join(' ')}`;
 }
 
 // 出題テキストを音素分解する関数
@@ -180,63 +178,6 @@ function calculateMatchPercentage(a, b) {
     return ((1 - distance / maxLen) * 100).toFixed(2);
 }
 
-// 「評価する」ボタンが押されたときに発音評価を実行
-function setupEvaluateButton() {
-    console.log('setupEvaluateButton 関数が呼び出されました'); // デバッグ用ログ
-
-    const evaluateButton = document.getElementById('evaluateButton');
-    if (!evaluateButton) {
-        console.error("評価するボタンが見つかりません。");
-        return;
-    }
-
-    console.log('評価するボタンが見つかりました:', evaluateButton);
-
-    evaluateButton.addEventListener('click', () => {
-        console.log('評価するボタンがクリックされました');
-
-        // 出題テキストを取得（ハングル文字単位）
-        const questionTextElement = document.getElementById('wordDisplay');
-        if (!questionTextElement || questionTextElement.textContent.trim() === '') {
-            console.error("出題テキストが見つかりません！");
-            alert("出題テキストが設定されていません！");
-            return;
-        }
-        const questionText = questionTextElement.textContent.trim();
-        console.log('出題テキスト:', questionText);
-
-        // ユーザー音声認識結果を取得（ハングル文字単位）
-        const phonemeTextElement = document.getElementById('phonemeText');
-        if (!phonemeTextElement || phonemeTextElement.textContent.trim() === '') {
-            console.error("ユーザー音声認識結果が見つかりません！");
-            alert("ユーザー音声認識結果がありません！");
-            return;
-        }
-        const userTextMatch = phonemeTextElement.textContent.match(/ユーザー音声認識結果:\s(.+)/);
-        const userText = userTextMatch ? userTextMatch[1].trim() : '';
-
-        console.log('ユーザー音声認識結果:', userText);
-
-        if (!userText) {
-            console.error("ユーザー音声認識結果が空です！");
-            alert("ユーザー音声認識結果が取得できませんでした！");
-            return;
-        }
-
-        // 発音評価は音素を用いて実行
-        const { filteredPhonemes: questionPhonemes } = decomposeQuestionTextToPhonemes();
-        const userPhonemeTextMatch = phonemeTextElement.textContent.match(/音素分解:\s(.+)/);
-        const userPhonemes = userPhonemeTextMatch ? userPhonemeTextMatch[1].trim().split(' ') : [];
-        console.log('音素による発音評価を実行: ユーザー音素:', userPhonemes, '出題音素:', questionPhonemes);
-        displayEvaluation(userPhonemes, questionPhonemes);
-
-        // 逐文字比較を実行
-        const comparisonResult = compareTextsBasedOnUserInput(userText, questionText);
-        displayTextComparisonResult(comparisonResult, questionText);
-    });
-}
-
-
 
 // 挿入された音素、削除された音素、置換された音素を表示する
 function displayPhonemeDetails(details) {
@@ -315,15 +256,6 @@ function compareTextsSequentially(questionText, userText) {
 
 
 
-
-
-// ページロード時とボタンイベントをまとめて設定
-document.addEventListener('DOMContentLoaded', () => {
-    const decomposeTextButton = document.getElementById('decomposeTextButton');
-    decomposeTextButton?.addEventListener('click', decomposeAndDisplayQuestionPhonemes);
-
-    setupEvaluateButton();
-});
 
 
 // 出題テキストを音素に分解する関数
