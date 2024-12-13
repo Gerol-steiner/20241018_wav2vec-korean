@@ -5,20 +5,179 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio Visualizer and Speech Recognition</title>
+
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jamo"></script>
 
 <style>
     body {
-        background-color: rgb(162, 162, 162);
-    }
-    #audioGraph {
-        width: 30%;
-        height: 200px;
-        /* 高さを指定 */
+        background-color: rgb(62, 62, 62);
+        color: white;
     }
 
+    .container {
+        width: 60%;
+        margin: 20px auto;
+        border: solid 1px yellow;
+    }
+    /* グラフ */
+    #audioGraph {
+        width: 300px;
+        height: 100px;
+        border-radius: 10px;
+        border: solid 2px rgb(84, 83, 83);
+    }
+
+    /* 最上部コンテナ */
+    .upper-container {
+        height: 150px;
+        display: flex;
+        border: solid 1px red;
+    }
+
+    .boy-image {
+        height: 100%;
+    }
+
+    /* お手本音声の読み上げボタン */
+    #readButton {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    #wordDisplay {
+        font-size: 2em;
+        font-weight: 600;
+        display: inline-block; /* インラインブロックで横並び可能に */
+        vertical-align: middle; /* 他の要素との整列を調整 */
+        width: auto; /* 必要に応じて幅を調整 */
+    }
+
+        /* 吹き出し */
+    .speech-bubble {
+        height: 40px;
+        position: relative;
+        display: inline-block;
+        background: rgb(62, 62, 62);
+        border: 3px solid rgb(105, 104, 104);
+        border-radius: 15px;
+        margin: auto 30px;
+        padding: 25px;
+    }
+
+    .speech-bubble::before,
+    .speech-bubble::after {
+        content: '';
+        position: absolute;
+        border-style: solid;
+    }
+
+    .speech-bubble::before {
+        left: -25px; /* 外側の三角形 */
+        border-width: 20px 22px 0px 0;
+        top: 50px; /*高さ方向の位置調整*/
+        border-color: transparent rgb(105, 104, 104);
+    }
+
+    .speech-bubble::after {
+        left: -19px; /* 内側の三角形 */
+        border-width: 18px 20px 0px 0;
+        top: 50px; /*高さ方向の位置調整*/
+        border-color: transparent rgb(62, 62, 62) transparent transparent;
+    }
+
+    /* 次の単語表示ボタン */
+    body #nextWordButton {
+        font-family: "Montserrat", sans-serif !important;
+        font-size: 1em;
+        color: rgb(205, 39, 205);
+        display: flex; /* アイコンとテキストを横並びにする */
+        align-items: center; /* 縦方向の中央揃え */
+        cursor: pointer;
+        border-radius: 50px;
+        height: 36px;
+        border: solid 1px rgb(105, 104, 104);
+        background-color: rgb(62, 62, 62);
+        margin: auto 0 auto 200px;
+        padding: 0 20px;
+        box-shadow: 1px 2px 0 rgb(105, 104, 104);
+    }
+
+    body #nextWordButton:hover {
+    color: rgb(158, 35, 158);/* テキストの色を白に変更 */
+    background-color: rgb(56, 56, 56); /* 背景色を少し明るいグレーに変更 */
+    border-color: rgb(93, 93, 93); /* ボーダーの色を紫に変更 */
+    box-shadow: 1px 2px 0 rgb(93, 93, 93);
+    }
+
+    .arrow-icon {
+    width: 20px; /* アイコンの幅 */
+    height: 20px; /* アイコンの高さ */
+    margin-left: 10px; /* テキストとの間隔 */
+    }
+
+    body #playButton {
+        font-size: 1em;
+        color: rgb(58, 171, 210);
+        display: flex; /* アイコンとテキストを横並びにする */
+        align-items: center; /* 縦方向の中央揃え */
+        cursor: pointer;
+        border-radius: 50px;
+        height: 36px;
+        border: solid 1px rgb(105, 104, 104);
+        background-color: rgb(62, 62, 62);
+        margin: auto 0 auto 200px;
+        padding: 0 20px;
+        box-shadow: 1px 2px 0 rgb(105, 104, 104);
+    }
+
+    body #playButton:hover {
+        color: rgb(58, 171, 210);/* テキストの色を白に変更 */
+        background-color: rgb(56, 56, 56); /* 背景色を少し明るいグレーに変更 */
+        border-color: rgb(93, 93, 93); /* ボーダーの色を紫に変更 */
+        box-shadow: 1px 2px 0 rgb(93, 93, 93);
+    }
+
+    .ear-icon {
+        width: 22px; /* アイコンの幅 */
+        height: 22px; /* アイコンの高さ */
+        margin-right: 15px; /* テキストとの間隔 */
+    }
+
+    body #speakButton {
+        font-size: 1.3em;
+        color: rgb(58, 171, 210);
+        display: flex; /* アイコンとテキストを横並びにする */
+        align-items: center; /* 縦方向の中央揃え */
+        cursor: pointer;
+        border-radius: 50px;
+        height: 50px;
+        border: solid 2px rgb(105, 104, 104);
+        background-color: rgb(62, 62, 62);
+        margin: auto 0 auto 200px;
+        padding: 10px 20px;
+        box-shadow: 1px 2px 0 rgb(105, 104, 104);
+    }
+
+    body #playButton:hover {
+        color: rgb(58, 171, 210);/* テキストの色を白に変更 */
+        background-color: rgb(56, 56, 56); /* 背景色を少し明るいグレーに変更 */
+        border-color: rgb(93, 93, 93); /* ボーダーの色を紫に変更 */
+        box-shadow: 1px 2px 0 rgb(93, 93, 93);
+    }
+
+    .speak-icon {
+        width: 30px; /* アイコンの幅 */
+        height: 30px; /* アイコンの高さ */
+        margin-right: 15px; /* テキストとの間隔 */
+    }
+
+    .second-container {
+        justify-content: space-between;
+        border: solid 1px green;
+        display: flex;
+    }
 </style>
 
 </head>
@@ -26,56 +185,96 @@
 
 
 <body>
-    <h1>Audio Visualizer and Speech Recognition</h1>
-
-    <!-- 単語表示エリア -->
-    <div id="wordDisplay" style="font-size: 2em; margin: 20px;"></div> <!-- 単語表示エリア -->
-    <button id="readButton">読み上げ</button> <!-- 読み上げボタンを追加 -->
-    <button id="nextWordButton">次の単語を表示</button> <!-- 次の単語ボタン -->
 
 
 
-    <button id="speakButton">Speak</button>
-    <button id="playButton" disabled>自分の声を確認する</button>
+    <div class="container">
 
-    <div id="audioGraph"></div> <!-- グラフ用のdiv -->
+        <h1>Audio Visualizer and Speech Recognition</h1>
 
-    <div id="sequentialComparisonResult" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-        <h3>逐文字比較結果</h3>
-        <p>ここに逐文字比較結果が表示されます。</p>
+        <!-- 最上部コンテナ -->
+        <div class="upper-container">
+            <!-- 男の子の画像 -->
+            <img src="/static/images/boy.png" alt="Boy Image" class="boy-image">
+
+            <!-- 吹き出し -->
+            <div class="speech-bubble">
+                <!-- お手本読みだげボタン（スピーカ―アイコン） -->
+                <a id="readButton" href="#">
+                    <img src="/static/images/speaker.png" alt="読み上げ" style="width: 40px; height: 40px;">
+                </a>
+
+                <!-- 単語表示エリア -->
+                <div id="wordDisplay"></div> <!-- 単語表示エリア -->
+            </div>
+
+            <!-- 次の単語ボタン -->
+            <button id="nextWordButton">
+                次の単語
+                <img src="/static/images/right-arrow.svg" alt="Right Arrow" class="arrow-icon">
+            </button>
+
+        </div>
+
+
+
+
+
+
+
+
+
+        <div class="second-container">
+
+            <button id="speakButton">
+                <img src="/static/images/speak.svg" alt="Speak" class="speak-icon">
+                Speak
+            </button>
+
+            <div id="audioGraph"></div> <!-- グラフ用のdiv -->
+
+            <button id="playButton" disabled>
+                <img src="/static/images/ear.svg" alt="Ear" class="ear-icon">
+                自分の声を確認
+            </button>
+        </div>
+
+        <div id="sequentialComparisonResult" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
+            <h3>逐文字比較結果</h3>
+            <p>ここに逐文字比較結果が表示されます。</p>
+        </div>
+
+        <div>
+            <h3>一致率</h3>
+            <p id="matchPercentageText">ここに一致率が表示されます。</p>
+        </div>
+
+
+
+        <div id="phonemeComparison">
+            <p id="userPhonemeComparison">ユーザー音声認識結果の音素分解: </p>
+            <p id="questionPhonemeComparison">出題テキストの音素分解: </p>
+        </div>
+
+
+
+
+
+        <!-- ユーザー音声の発音評価エリア -->
+        <div id="evaluationDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
+            <h3>ユーザー音声の発音評価</h3>
+            <p id="evaluationText">ここに発音評価が表示されます。</p>
+        </div>
+
+
+
+        <div id="phonemeDetails" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
+            <h3>編集距離の詳細</h3>
+            <p><strong>挿入された音素:</strong> <span id="insertedPhonemes">ここに挿入された音素が表示されます。</span></p>
+            <p><strong>削除された音素:</strong> <span id="deletedPhonemes">ここに削除された音素が表示されます。</span></p>
+            <p><strong>置換された音素:</strong> <span id="substitutedPhonemes">ここに置換された音素が表示されます。</span></p>
+        </div>
     </div>
-
-    <div>
-        <h3>一致率</h3>
-        <p id="matchPercentageText">ここに一致率が表示されます。</p>
-    </div>
-
-
-
-    <div id="phonemeComparison">
-        <p id="userPhonemeComparison">ユーザー音声認識結果の音素分解: </p>
-        <p id="questionPhonemeComparison">出題テキストの音素分解: </p>
-    </div>
-
-
-
-
-
-    <!-- ユーザー音声の発音評価エリア -->
-    <div id="evaluationDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-        <h3>ユーザー音声の発音評価</h3>
-        <p id="evaluationText">ここに発音評価が表示されます。</p>
-    </div>
-
-
-
-    <div id="phonemeDetails" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-        <h3>編集距離の詳細</h3>
-        <p><strong>挿入された音素:</strong> <span id="insertedPhonemes">ここに挿入された音素が表示されます。</span></p>
-        <p><strong>削除された音素:</strong> <span id="deletedPhonemes">ここに削除された音素が表示されます。</span></p>
-        <p><strong>置換された音素:</strong> <span id="substitutedPhonemes">ここに置換された音素が表示されます。</span></p>
-    </div>
-
 
     <!-- 【ここから下は非表示エリア】 ※消去することでエラーとなるので、消去不可※ -->
 

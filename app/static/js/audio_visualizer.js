@@ -24,40 +24,44 @@ function toggleRecording() {
 
 function startRecording() {
     isRecordingVisualizer = true;
-    speakButton.textContent = 'Recording...';
+    // ボタン内の画像はそのままに、テキストのみ変更
+    const img = speakButton.querySelector('.speak-icon');
+    if (img) {
+        img.src = '/static/images/recording.svg'; // 録音中の状態を表すアイコンに変更
+    }
+    const span = speakButton.querySelector('.speak-text');
+    if (!span) {
+        const newSpan = document.createElement('span');
+        newSpan.classList.add('speak-text');
+        newSpan.textContent = 'Recording...';
+        speakButton.appendChild(newSpan);
+    } else {
+        span.textContent = 'Recording...';
+    }
     speakButton.disabled = true;
+
     // オーディオ処理を初期化
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
     analyser = audioContext.createAnalyser();
-    // マイクにアクセス
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
-            // マイクデータをオーディオ処理に接続（マイクからの音声ストリーム（stream）を AudioContext の入力ソースとして接続）
             const source = audioContext.createMediaStreamSource(stream);
-            source.connect(analyser); // 入力ソース（source）をアナライザーに接続
-
-            analyser.fftSize = 256;  // 周波数解析の精度
-            dataArray = new Uint8Array(analyser.frequencyBinCount);  // 「frequencyBinCount」：FFT（高速フーリエ変換）により解析される周波数帯域の数（dataArray はそのデータを格納する配列）
-            volumeData = []; // 音量データを保持する配列をリセット
+            source.connect(analyser);
+            analyser.fftSize = 256;
+            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            volumeData = [];
             startTime = Date.now();
-            audioChunks = []; // ★ 録音データをを保持する配列を初期化
+            audioChunks = [];
 
-            const mediaRecorder = new MediaRecorder(stream); // マイクからの音声ストリーム（stream）を録音するオブジェクト
-            mediaRecorder.ondataavailable = (event) => {  // 録音中に取得した音声データ（event.data）を audioChunks 配列に追加
-                audioChunks.push(event.data); // ★ここで録音データを保存
-            };
-
-            // 録音停止時にサーバーに送信し、その後stopRecordingを呼び出す
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
             mediaRecorder.onstop = () => {
-                sendAudioToServer(); // ★ 録音停止時にサーバーに送信
-                stopRecording(); // 録音停止後にボタンの状態を元に戻す
+                sendAudioToServer();
+                stopRecording();
             };
-            // 録音を開始（録音データは、「ondataavailable」 イベントを通じて収集される）
             mediaRecorder.start();
-            // 録音中にビジュアライザーのグラフをリアルタイムで更新する処理を開始（「updateGraph」 はグラフの更新を行う関数）
             requestAnimationFrame(updateGraph);
 
-            // 3秒後に自動的に停止
             setTimeout(() => {
                 if (isRecordingVisualizer) {
                     mediaRecorder.stop();
@@ -73,12 +77,22 @@ function startRecording() {
 
 function stopRecording() {
     isRecordingVisualizer = false;
-    speakButton.textContent = 'Speak'; // ボタンを元に戻す
-    speakButton.disabled = false; // ボタンを再度有効にする
+    // ボタン内の画像を元に戻す
+    const img = speakButton.querySelector('.speak-icon');
+    if (img) {
+        img.src = '/static/images/speak.svg';
+    }
+    const span = speakButton.querySelector('.speak-text');
+    if (span) {
+        span.textContent = 'Speak';
+    }
+    speakButton.disabled = false;
+
     if (audioContext) {
         audioContext.close();
     }
 }
+
 
 
 
@@ -99,9 +113,21 @@ function updateGraph() {
         Plotly.newPlot(graphDiv, [{
             x: volumeData.map(data => data.x),
             y: volumeData.map(data => data.y),
-            type: 'line'
+            type: 'line',
+            line: {
+                color: 'rgb(58, 171, 210)', // ラインの色を指定 // ラインの色をマゼンタに指定
+                width: 2 // ラインの太さ（オプション）
+            }
         }], {
             title: '', // グラフタイトルを非表示
+            width: 300, // グラフ全体の幅を固定
+            height: 100, // グラフ全体の高さを固定
+            margin: {
+                l: 0, // 左の余白
+                r: 0, // 右の余白
+                t: 0, // 上の余白
+                b: 0  // 下の余白
+            },
             xaxis: {
                 title: '', // X軸ラベルを非表示
                 range: [0, 3], // 横軸の範囲を0〜3秒に固定
