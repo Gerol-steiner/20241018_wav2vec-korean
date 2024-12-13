@@ -18,19 +18,22 @@
 
     .container {
         width: 60%;
-        margin: 20px auto;
+        margin: 50px auto;
         border: solid 1px yellow;
     }
     /* グラフ */
     #audioGraph {
-        width: 300px;
-        height: 100px;
+        width: 400px;
+        height: 150px;
         border-radius: 10px;
         border: solid 2px rgb(84, 83, 83);
+        margin-left: 50px;
     }
 
     /* 最上部コンテナ */
     .upper-container {
+        display: flex;
+        justify-content: space-between;
         height: 150px;
         display: flex;
         border: solid 1px red;
@@ -62,8 +65,9 @@
         background: rgb(62, 62, 62);
         border: 3px solid rgb(105, 104, 104);
         border-radius: 15px;
-        margin: auto 30px;
+        margin: auto 0;
         padding: 25px;
+        margin-left: -138px;
     }
 
     .speech-bubble::before,
@@ -145,22 +149,26 @@
         margin-right: 15px; /* テキストとの間隔 */
     }
 
-    body #speakButton {
-        font-size: 1.3em;
+    /* 「Speak」ボタン */
+    .speak-button {
+        display: flex;
+        align-items: center; /* 垂直方向で中央揃え */
+        justify-content: center; /* 水平方向で中央揃え */
+        font-size: 1.8em;
         color: rgb(58, 171, 210);
-        display: flex; /* アイコンとテキストを横並びにする */
-        align-items: center; /* 縦方向の中央揃え */
         cursor: pointer;
-        border-radius: 50px;
-        height: 50px;
-        border: solid 2px rgb(105, 104, 104);
+        width: 400px;
+        height: 150px;
+        border-radius: 10px;
+        border: solid 2px rgb(84, 83, 83);
         background-color: rgb(62, 62, 62);
-        margin: auto 0 auto 200px;
         padding: 10px 20px;
-        box-shadow: 1px 2px 0 rgb(105, 104, 104);
+        box-shadow: 2px 3px 0 rgb(105, 104, 104);
+        margin-left: 50px;
     }
 
-    body #playButton:hover {
+
+    body #speakButton:hover {
         color: rgb(58, 171, 210);/* テキストの色を白に変更 */
         background-color: rgb(56, 56, 56); /* 背景色を少し明るいグレーに変更 */
         border-color: rgb(93, 93, 93); /* ボーダーの色を紫に変更 */
@@ -168,12 +176,18 @@
     }
 
     .speak-icon {
-        width: 30px; /* アイコンの幅 */
-        height: 30px; /* アイコンの高さ */
+        width: 35px; /* アイコンの幅 */
+        height: 35px; /* アイコンの高さ */
         margin-right: 15px; /* テキストとの間隔 */
     }
 
+    .speak-text {
+    padding: 10px 0;
+    line-height: normal; /* テキストの縦方向の高さ調整 */
+}
+
     .second-container {
+        margin-top: 50px;
         justify-content: space-between;
         border: solid 1px green;
         display: flex;
@@ -190,11 +204,13 @@
 
     <div class="container">
 
-        <h1>Audio Visualizer and Speech Recognition</h1>
+        <h1 style="text-align: center;">Audio Visualizer and Speech Recognition</h1>
+                    <h3 style="margin-top: 40px;">次の文を読み上げてください</h3>
 
         <!-- 最上部コンテナ -->
         <div class="upper-container">
             <!-- 男の子の画像 -->
+
             <img src="/static/images/boy.png" alt="Boy Image" class="boy-image">
 
             <!-- 吹き出し -->
@@ -226,12 +242,12 @@
 
         <div class="second-container">
 
-            <button id="speakButton">
+            <button id="speakButton" class="speak-button">
                 <img src="/static/images/speak.svg" alt="Speak" class="speak-icon">
-                Speak
+                <span class="speak-text">クリックして話す</span>
             </button>
 
-            <div id="audioGraph"></div> <!-- グラフ用のdiv -->
+            <div id="audioGraph" style="display: none;"></div> <!-- グラフ用のdiv -->
 
             <button id="playButton" disabled>
                 <img src="/static/images/ear.svg" alt="Ear" class="ear-icon">

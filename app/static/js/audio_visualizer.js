@@ -24,21 +24,10 @@ function toggleRecording() {
 
 function startRecording() {
     isRecordingVisualizer = true;
-    // ボタン内の画像はそのままに、テキストのみ変更
-    const img = speakButton.querySelector('.speak-icon');
-    if (img) {
-        img.src = '/static/images/recording.svg'; // 録音中の状態を表すアイコンに変更
-    }
-    const span = speakButton.querySelector('.speak-text');
-    if (!span) {
-        const newSpan = document.createElement('span');
-        newSpan.classList.add('speak-text');
-        newSpan.textContent = 'Recording...';
-        speakButton.appendChild(newSpan);
-    } else {
-        span.textContent = 'Recording...';
-    }
-    speakButton.disabled = true;
+
+    // speakButtonを非表示、audioGraphを表示
+    speakButton.style.display = 'none';
+    graphDiv.style.display = 'block';
 
     // オーディオ処理を初期化
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -77,21 +66,26 @@ function startRecording() {
 
 function stopRecording() {
     isRecordingVisualizer = false;
-    // ボタン内の画像を元に戻す
+
+    // ボタン表示を戻す際にHTMLの子要素を直接変更せず、CSSと構造を保持
+    graphDiv.style.display = 'none';
+    speakButton.style.display = 'flex'; // display:flexを指定してCSSの影響を適用
+
     const img = speakButton.querySelector('.speak-icon');
     if (img) {
         img.src = '/static/images/speak.svg';
     }
+
     const span = speakButton.querySelector('.speak-text');
     if (span) {
         span.textContent = 'Speak';
     }
-    speakButton.disabled = false;
 
     if (audioContext) {
         audioContext.close();
     }
 }
+
 
 
 
@@ -120,8 +114,8 @@ function updateGraph() {
             }
         }], {
             title: '', // グラフタイトルを非表示
-            width: 300, // グラフ全体の幅を固定
-            height: 100, // グラフ全体の高さを固定
+            width: 400, // グラフ全体の幅を固定
+            height: 150, // グラフ全体の高さを固定
             margin: {
                 l: 0, // 左の余白
                 r: 0, // 右の余白
