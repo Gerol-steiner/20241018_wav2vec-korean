@@ -78,7 +78,7 @@ function stopRecording() {
 
     const span = speakButton.querySelector('.speak-text');
     if (span) {
-        span.textContent = 'Speak';
+        span.textContent = 'クリックして話す';
     }
 
     if (audioContext) {

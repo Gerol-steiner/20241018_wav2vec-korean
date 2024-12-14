@@ -27,20 +27,21 @@
         height: 150px;
         border-radius: 10px;
         border: solid 2px rgb(84, 83, 83);
-        margin-left: 50px;
+        margin-left: 350px;
     }
 
     /* 最上部コンテナ */
     .upper-container {
         display: flex;
-        justify-content: space-between;
-        height: 150px;
+        height: 250px;
         display: flex;
         border: solid 1px red;
+        padding-top: 50px;
     }
 
     .boy-image {
-        height: 100%;
+        height: 180px;
+        margin-left: 200px;
     }
 
     /* お手本音声の読み上げボタン */
@@ -66,8 +67,8 @@
         border: 3px solid rgb(105, 104, 104);
         border-radius: 15px;
         margin: auto 0;
-        padding: 25px;
-        margin-left: -138px;
+        padding: 25px 40px;
+        margin-left: 35px;
     }
 
     .speech-bubble::before,
@@ -91,6 +92,9 @@
         border-color: transparent rgb(62, 62, 62) transparent transparent;
     }
 
+    .next-word-container {
+    }
+
     /* 次の単語表示ボタン */
     body #nextWordButton {
         font-family: "Montserrat", sans-serif !important;
@@ -99,25 +103,19 @@
         display: flex; /* アイコンとテキストを横並びにする */
         align-items: center; /* 縦方向の中央揃え */
         cursor: pointer;
-        border-radius: 50px;
         height: 36px;
-        border: solid 1px rgb(105, 104, 104);
+        border: none;
         background-color: rgb(62, 62, 62);
-        margin: auto 0 auto 200px;
-        padding: 0 20px;
-        box-shadow: 1px 2px 0 rgb(105, 104, 104);
+        margin: 10px 27px 0px auto;
     }
 
     body #nextWordButton:hover {
-    color: rgb(158, 35, 158);/* テキストの色を白に変更 */
-    background-color: rgb(56, 56, 56); /* 背景色を少し明るいグレーに変更 */
-    border-color: rgb(93, 93, 93); /* ボーダーの色を紫に変更 */
-    box-shadow: 1px 2px 0 rgb(93, 93, 93);
+        text-decoration: underline;
     }
 
     .arrow-icon {
-    width: 20px; /* アイコンの幅 */
-    height: 20px; /* アイコンの高さ */
+    width: 18px; /* アイコンの幅 */
+    height: 18px; /* アイコンの高さ */
     margin-left: 10px; /* テキストとの間隔 */
     }
 
@@ -129,11 +127,9 @@
         cursor: pointer;
         border-radius: 50px;
         height: 36px;
-        border: solid 1px rgb(105, 104, 104);
         background-color: rgb(62, 62, 62);
-        margin: auto 0 auto 200px;
+        margin: auto 90px auto 0;
         padding: 0 20px;
-        box-shadow: 1px 2px 0 rgb(105, 104, 104);
     }
 
     body #playButton:hover {
@@ -149,7 +145,7 @@
         margin-right: 15px; /* テキストとの間隔 */
     }
 
-    /* 「Speak」ボタン */
+    /* 「クリックして話す」ボタン */
     .speak-button {
         display: flex;
         align-items: center; /* 垂直方向で中央揃え */
@@ -164,7 +160,7 @@
         background-color: rgb(62, 62, 62);
         padding: 10px 20px;
         box-shadow: 2px 3px 0 rgb(105, 104, 104);
-        margin-left: 50px;
+        margin-left: 350px;
     }
 
 
@@ -178,7 +174,7 @@
     .speak-icon {
         width: 35px; /* アイコンの幅 */
         height: 35px; /* アイコンの高さ */
-        margin-right: 15px; /* テキストとの間隔 */
+        margin-right: 25px; /* テキストとの間隔 */
     }
 
     .speak-text {
@@ -189,7 +185,6 @@
     .second-container {
         margin-top: 50px;
         justify-content: space-between;
-        border: solid 1px green;
         display: flex;
     }
 </style>
@@ -205,30 +200,37 @@
     <div class="container">
 
         <h1 style="text-align: center;">Audio Visualizer and Speech Recognition</h1>
-                    <h3 style="margin-top: 40px;">次の文を読み上げてください</h3>
+                    <h3 style="margin-top: 40px;">■ 次の文を読み上げてください</h3>
 
         <!-- 最上部コンテナ -->
         <div class="upper-container">
-            <!-- 男の子の画像 -->
+            <div class="next-word-container">
 
-            <img src="/static/images/boy.png" alt="Boy Image" class="boy-image">
+                <!-- 男の子の画像 -->
+                <img src="/static/images/boy.png" alt="Boy Image" class="boy-image">
 
-            <!-- 吹き出し -->
-            <div class="speech-bubble">
-                <!-- お手本読みだげボタン（スピーカ―アイコン） -->
-                <a id="readButton" href="#">
-                    <img src="/static/images/speaker.png" alt="読み上げ" style="width: 40px; height: 40px;">
-                </a>
+                <!-- 次の単語ボタン -->
+                <button id="nextWordButton">
+                    次の単語
+                    <img src="/static/images/right-arrow.svg" alt="Right Arrow" class="arrow-icon">
+                </button>
 
-                <!-- 単語表示エリア -->
-                <div id="wordDisplay"></div> <!-- 単語表示エリア -->
             </div>
 
-            <!-- 次の単語ボタン -->
-            <button id="nextWordButton">
-                次の単語
-                <img src="/static/images/right-arrow.svg" alt="Right Arrow" class="arrow-icon">
-            </button>
+
+
+                <!-- 吹き出し -->
+                <div class="speech-bubble">
+                    <!-- お手本読みだげボタン（スピーカ―アイコン） -->
+                    <a id="readButton" href="#">
+                        <img src="/static/images/speaker.png" alt="読み上げ" style="width: 40px; height: 40px; margin-right: 10px;">
+                    </a>
+
+                    <!-- 単語表示エリア -->
+                    <div id="wordDisplay"></div> <!-- 単語表示エリア -->
+                </div>
+
+
 
         </div>
 
