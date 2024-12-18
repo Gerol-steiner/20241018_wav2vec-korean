@@ -19,7 +19,9 @@
     .container {
         width: 60%;
         margin: 50px auto;
-        border: solid 1px yellow;
+        padding: 30px 50px;
+        border: solid 3px rgb(100, 100, 100);
+        border-radius: 15px;
     }
     /* グラフ */
     #audioGraph {
@@ -35,7 +37,7 @@
         display: flex;
         height: 250px;
         display: flex;
-        border: solid 1px red;
+
         padding-top: 50px;
     }
 
@@ -187,6 +189,11 @@
         justify-content: space-between;
         display: flex;
     }
+    /* ハングル単位の比較 */
+    .comparison-result {
+        font-size: 23px; /* 文字サイズを32pxに設定 */
+
+    }
 </style>
 
 </head>
@@ -217,8 +224,6 @@
 
             </div>
 
-
-
                 <!-- 吹き出し -->
                 <div class="speech-bubble">
                     <!-- お手本読みだげボタン（スピーカ―アイコン） -->
@@ -229,18 +234,7 @@
                     <!-- 単語表示エリア -->
                     <div id="wordDisplay"></div> <!-- 単語表示エリア -->
                 </div>
-
-
-
         </div>
-
-
-
-
-
-
-
-
 
         <div class="second-container">
 
@@ -257,21 +251,27 @@
             </button>
         </div>
 
-        <div id="sequentialComparisonResult" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-            <h3>逐文字比較結果</h3>
-            <p>ここに逐文字比較結果が表示されます。</p>
+        <div style="display: flex; align-items: center; margin: 40px 0;">
+            <h1 style="margin-right: 50px;">■ あなたの発音</h1>
+            <p style="font-size: 32px; font-weight: 600;" id="matchPercentageText">-- 点</p>
         </div>
 
-        <div>
-            <h3>一致率</h3>
-            <p id="matchPercentageText">ここに一致率が表示されます。</p>
+        <div id="sequentialComparisonResult">
+            <h1>■ ハングル単位の比較</h1>
+                <div style="margin-left: 70px;">
+                    <p style="font-size: 23px; margin-top: 0; margin-bottom: 30px;">ユーザー音声認識結果:</p>
+                    <p style="font-size: 23px; margin-top: 0; margin-bottom: 30px;">正解テキスト：</p>
+                </div>
         </div>
 
 
 
-        <div id="phonemeComparison">
-            <p id="userPhonemeComparison">ユーザー音声認識結果の音素分解: </p>
-            <p id="questionPhonemeComparison">出題テキストの音素分解: </p>
+        <div style="margin: 60px 0;">
+            <h1>■ 音素単位の比較</h1>
+            <div id="phonemeComparison">
+                <p id="userPhonemeComparison">ユーザー音声認識結果の音素分解: </p>
+                <p id="questionPhonemeComparison">出題テキストの音素分解: </p>
+            </div>
         </div>
 
 

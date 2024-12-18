@@ -81,6 +81,9 @@ function displayEvaluation(transcribedPhonemes, questionPhonemes) {
     const matchPercentage = calculateMatchPercentage(transcribedPhonemes, questionPhonemes);
     console.log('一致率:', matchPercentage);
 
+    // 点数を計算（小数点以下を切り捨てて整数化）
+    const score = Math.floor(matchPercentage);
+
     try {
         // 既存の詳細情報を更新
         resultDisplay.innerHTML = `
@@ -90,8 +93,8 @@ function displayEvaluation(transcribedPhonemes, questionPhonemes) {
             <strong>編集距離の内訳:</strong> 挿入(${operations.insertions}), 削除(${operations.deletions}), 置換(${operations.substitutions})<br>
         `;
 
-        // 一致率を別タグに設定
-        matchPercentageDisplay.textContent = `一致率: ${matchPercentage}%`;
+        // 点数をビューに表示
+        matchPercentageDisplay.textContent = `点数: ${score}点`;
 
         console.log('評価結果がevaluationTextに設定されました。');
         console.log('一致率がmatchPercentageTextに設定されました。');
@@ -384,11 +387,19 @@ function displayTextComparisonResult(comparisonResult, questionText) {
 
     // タイトルを保持したまま結果を更新
     resultContainer.innerHTML = `
-        <h3>逐文字比較結果</h3>
-        <div>ユーザー音声認識結果: ${userTextDisplay}</div>
-        <div>出題テキスト: ${questionTextDisplay}</div>
-    `;
-}
+        <h1>■ ハングル単位の比較</h1>
+            <div style="margin-left: 70px; display: flex;">
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <p class="comparison-result" style="margin-top: 0; margin-bottom: 30px;">ユーザー音声認識結果:</p>
+                    <p class="comparison-result" style="margin-top: 0; margin-bottom: 30px;">正解テキスト:</p>
+                </div>
+                <div style="display: flex; flex-direction: column; justify-content: center; margin-left: 40px;">
+                    <p class="comparison-result" style="margin-top: 0; margin-bottom: 30px;">${userTextDisplay}</p>
+                    <p class="comparison-result" style="margin-top: 0; margin-bottom: 30px;">${questionTextDisplay}</p>
+                </div>
+            </div>
+        `;
+    }
 
 
 function evaluateUserInput() {
