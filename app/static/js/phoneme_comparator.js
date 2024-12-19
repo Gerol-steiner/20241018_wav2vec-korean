@@ -87,11 +87,19 @@ function displayEvaluation(transcribedPhonemes, questionPhonemes) {
     try {
         // 既存の詳細情報を更新
         resultDisplay.innerHTML = `
-            <strong>編集回数:</strong> ${distance}<br>
-            <strong>音素列長:</strong> 出題(${questionPhonemes.length}), ユーザー(${transcribedPhonemes.length})<br>
-            <strong>編集距離:</strong> ${distance}<br>
-            <strong>編集距離の内訳:</strong> 挿入(${operations.insertions}), 削除(${operations.deletions}), 置換(${operations.substitutions})<br>
-        `;
+            <div style="margin: 15px 0;">
+                <strong>編集回数:</strong> ${distance}<br>
+            </div>
+            <div style="margin: 15px 0;">
+                <strong>音素列長:</strong> 出題(${questionPhonemes.length}), ユーザー(${transcribedPhonemes.length})<br>
+            </div>
+            <div style="margin: 15px 0;">
+                <strong>編集距離:</strong> ${distance}<br>
+            </div>
+            <div style="margin: 15px 0;">
+                <strong>編集距離の内訳:</strong> 挿入(${operations.insertions}), 削除(${operations.deletions}), 置換(${operations.substitutions})<br>
+            </div>
+`;
 
         // 点数をビューに表示
         matchPercentageDisplay.textContent = `点数: ${score}点`;
@@ -368,8 +376,8 @@ function displayTextComparisonResult(comparisonResult, questionText) {
         .filter(result => !result.isInsert) // 挿入部分は除外
         .map(result => {
             return result.correct
-                ? `<span style="color: green;">${result.char}</span>` // 一致部分を緑
-                : `<span style="color: red;">${result.char}</span>`;  // 不一致部分を赤
+                ? `<span style="color: lime;">${result.char}</span>` // 一致部分を緑
+                : `<span style="color: red; font-weight: 900;">${result.char}</span>`;  // 不一致部分を赤
         })
         .join('');
 
@@ -380,14 +388,14 @@ function displayTextComparisonResult(comparisonResult, questionText) {
                 result => result.isInsert && result.char.replace(/[()]/g, '') === char
             );
             return isMissing
-                ? `<span style="color: red;">${char}</span>` // 不足部分を赤で表示
-                : char; // それ以外は黒
+                ? `<span style="color: red; font-weight: 900;">${char}</span>` // 不足部分を赤で表示
+                : `<span style="color: lime;">${char}</span>`; // それ以外は緑
         })
         .join('');
 
     // タイトルを保持したまま結果を更新
     resultContainer.innerHTML = `
-        <h1>■ ハングル単位の比較</h1>
+        <h2>▶ ハングル単位の比較</h2>
             <div style="margin-left: 70px; display: flex;">
                 <div style="display: flex; flex-direction: column; justify-content: center;">
                     <p class="comparison-result" style="margin-top: 0; margin-bottom: 30px;">ユーザー音声認識結果:</p>
@@ -453,44 +461,85 @@ function evaluateUserInput() {
 
 
 function comparePhonemes(userPhonemes, questionPhonemes) {
-    const userResult = [];
-    const questionResult = [];
-    const maxLength = Math.max(userPhonemes.length, questionPhonemes.length);
+    const n = userPhonemes.length;
+    const m = questionPhonemes.length;
 
-    let userIndex = 0;
-    let questionIndex = 0;
+    // Levenshtein距離計算用テーブル
+    const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+    const operationTable = Array.from({ length: n + 1 }, () => Array(m + 1).fill(''));
 
-    for (let i = 0; i < maxLength; i++) {
-        const userPhoneme = userPhonemes[userIndex] || '';
-        const questionPhoneme = questionPhonemes[questionIndex] || '';
+    // 初期化
+    for (let i = 0; i <= n; i++) dp[i][0] = i; // 削除
+    for (let j = 0; j <= m; j++) dp[0][j] = j; // 挿入
 
-        if (userPhoneme && questionPhoneme && userPhoneme === questionPhoneme) {
-            // 一致する音素
-            userResult.push({ phoneme: userPhoneme, correct: true });
-            questionResult.push({ phoneme: questionPhoneme, correct: true });
-            userIndex++;
-            questionIndex++;
-        } else if (userPhoneme && (!questionPhoneme || userPhoneme !== questionPhoneme)) {
-            // ユーザーの音素が正解に含まれない（不一致）
-            userResult.push({ phoneme: userPhoneme, correct: false });
-            if (questionPhoneme) {
-                questionResult.push({ phoneme: questionPhoneme, correct: false });
+    // DPテーブルの計算
+    for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <= m; j++) {
+            if (userPhonemes[i - 1] === questionPhonemes[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+                operationTable[i][j] = 'match';
+            } else {
+                const insertion = dp[i][j - 1] + 1;
+                const deletion = dp[i - 1][j] + 1;
+                const substitution = dp[i - 1][j - 1] + 1;
+
+                const minValue = Math.min(insertion, deletion, substitution);
+                dp[i][j] = minValue;
+
+                if (minValue === substitution) operationTable[i][j] = 'substitute';
+                else if (minValue === insertion) operationTable[i][j] = 'insert';
+                else operationTable[i][j] = 'delete';
             }
-            userIndex++;
-            questionIndex++;
-        } else if (!userPhoneme && questionPhoneme) {
-            // 出題テキストに余る音素
-            questionResult.push({ phoneme: questionPhoneme, correct: false });
-            questionIndex++;
-        } else if (userPhoneme && !questionPhoneme) {
-            // ユーザー音素に余る場合
-            userResult.push({ phoneme: userPhoneme, correct: false });
-            userIndex++;
         }
     }
 
-    return { userResult, questionResult };
+    // 結果の復元
+    const userResult = [];
+    const questionResult = [];
+
+    let i = n;
+    let j = m;
+
+    // ループで無限ループを防止
+    const maxIterations = n + m; // 最大のイテレーション回数を制限
+    let iterations = 0;
+
+    while ((i > 0 || j > 0) && iterations < maxIterations) {
+        const operation = operationTable[i]?.[j] || '';
+
+        if (operation === 'match') {
+            userResult.push({ phoneme: userPhonemes[i - 1], correct: true });
+            questionResult.push({ phoneme: questionPhonemes[j - 1], correct: true });
+            i--;
+            j--;
+        } else if (operation === 'delete') {
+            userResult.push({ phoneme: userPhonemes[i - 1], correct: false });
+            questionResult.push({ phoneme: '', correct: false });
+            i--;
+        } else if (operation === 'insert') {
+            userResult.push({ phoneme: '', correct: false });
+            questionResult.push({ phoneme: questionPhonemes[j - 1], correct: false });
+            j--;
+        } else if (operation === 'substitute') {
+            userResult.push({ phoneme: userPhonemes[i - 1], correct: false });
+            questionResult.push({ phoneme: questionPhonemes[j - 1], correct: false });
+            i--;
+            j--;
+        } else {
+            console.error(`無効な操作: operation=${operation}, i=${i}, j=${j}`);
+            break; // 無効な操作が発生した場合はループを終了
+        }
+
+        iterations++;
+    }
+
+    if (iterations >= maxIterations) {
+        console.error('ループが最大許容回数を超えました。ループを中断します。');
+    }
+
+    return { userResult: userResult.reverse(), questionResult: questionResult.reverse() };
 }
+
 
 
 function displayPhonemeComparison(userPhonemes, questionPhonemes) {
@@ -506,11 +555,11 @@ function displayPhonemeComparison(userPhonemes, questionPhonemes) {
     const { userResult, questionResult } = comparePhonemes(userPhonemes, questionPhonemes);
 
     const userDisplay = userResult.map(result =>
-        `<span style="color: ${result.correct ? 'green' : 'red'};">${result.phoneme}</span>`
+        `<span style="color: ${result.correct ? 'lime' : 'red'};">${result.phoneme}</span>`
     ).join(' ');
 
     const questionDisplay = questionResult.map(result =>
-        `<span style="color: ${result.correct ? 'black' : 'red'};">${result.phoneme}</span>`
+        `<span style="color: ${result.correct ? 'lime' : 'red'};">${result.phoneme}</span>`
     ).join(' ');
 
     const userPhonemeElement = document.getElementById('userPhonemeComparison');
@@ -521,8 +570,9 @@ function displayPhonemeComparison(userPhonemes, questionPhonemes) {
         return;
     }
 
-    userPhonemeElement.innerHTML = `ユーザー音声認識結果の音素分解: ${userDisplay}`;
-    questionPhonemeElement.innerHTML = `出題テキストの音素分解: ${questionDisplay}`;
+    userPhonemeElement.innerHTML = `<div style="font-size: 23px;">ユーザー音声認識結果: ${userDisplay}</div>`;
+    questionPhonemeElement.innerHTML = `<div style="font-size: 23px;">正解テキスト: ${questionDisplay}</div>`;
+
     console.log('音素比較結果を更新しました。');
 }
 

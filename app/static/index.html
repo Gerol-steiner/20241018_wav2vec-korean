@@ -16,6 +16,26 @@
         color: white;
     }
 
+    .gradient-title {
+        font-size: 2.5em; /* タイトルのサイズ */
+        font-weight: bold; /* 太字 */
+        text-align: center; /* 中央揃え */
+        background: linear-gradient(90deg, magenta ,rgb(35, 184, 252),  rgb(185, 24, 185)); /* グラデーション */
+        -webkit-background-clip: text; /* テキストのみ背景をクリップ */
+        -webkit-text-fill-color: transparent; /* テキストの塗りつぶしを透明に */
+        margin-bottom: 20px; /* 下部マージン */
+    }
+
+    .app-header {
+        background-color: rgb(45, 45, 45); /* ヘッダー背景色 */
+        padding: 20px 0; /* 上下のパディング */
+        text-align: center; /* タイトルを中央揃え */
+        position: sticky; /* スクロール時にヘッダーを固定 */
+        top: 0;
+        z-index: 100; /* ヘッダーを最前面に表示 */
+    }
+
+
     .container {
         width: 60%;
         margin: 50px auto;
@@ -202,11 +222,12 @@
 
 <body>
 
-
+    <!-- ヘッダー -->
+    <header class="app-header">
+        <h1 class="gradient-title">Say It in Hangeul</h1>
+    </header>
 
     <div class="container">
-
-        <h1 style="text-align: center;">Audio Visualizer and Speech Recognition</h1>
                     <h3 style="margin-top: 40px;">■ 次の文を読み上げてください</h3>
 
         <!-- 最上部コンテナ -->
@@ -251,48 +272,52 @@
             </button>
         </div>
 
-        <div style="display: flex; align-items: center; margin: 40px 0;">
+        <div style="display: flex; align-items: center; margin-top: 30px; margin-bottom: -10px;">
             <h1 style="margin-right: 50px;">■ あなたの発音</h1>
             <p style="font-size: 32px; font-weight: 600;" id="matchPercentageText">-- 点</p>
         </div>
 
+    <div style="margin-left: 70px; border: solid 2px rgb(93, 93, 93); margin-top: 0; margin-bottom: 70px; auto; padding: 20px; width: 80%;">
         <div id="sequentialComparisonResult">
-            <h1>■ ハングル単位の比較</h1>
+            <h2>▶ ハングル単位の比較</h2>
                 <div style="margin-left: 70px;">
-                    <p style="font-size: 23px; margin-top: 0; margin-bottom: 30px;">ユーザー音声認識結果:</p>
-                    <p style="font-size: 23px; margin-top: 0; margin-bottom: 30px;">正解テキスト：</p>
+                    <p style="font-size: 23px; margin-top: 0; margin-bottom: 30px;">・ ユーザー音声認識結果:</p>
+                    <p style="font-size: 23px; margin-top: 0; margin-bottom: 30px;">・ 正解テキスト：</p>
                 </div>
         </div>
 
 
 
         <div style="margin: 60px 0;">
-            <h1>■ 音素単位の比較</h1>
-            <div id="phonemeComparison">
-                <p id="userPhonemeComparison">ユーザー音声認識結果の音素分解: </p>
-                <p id="questionPhonemeComparison">出題テキストの音素分解: </p>
+            <h2>▶ 音素単位の比較</h2>
+            <div id="phonemeComparison" style="margin-left: 70px;">
+                <p id="userPhonemeComparison" style="font-size: 23px; margin-top: 0; margin-bottom: 30px;">・ ユーザー音声認識結果: </p>
+                <p id="questionPhonemeComparison" style="font-size: 23px; margin-top: 0; margin-bottom: 30px;">・ 正解テキスト: </p>
             </div>
         </div>
-
-
-
-
-
-        <!-- ユーザー音声の発音評価エリア -->
-        <div id="evaluationDisplay" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-            <h3>ユーザー音声の発音評価</h3>
-            <p id="evaluationText">ここに発音評価が表示されます。</p>
-        </div>
-
-
-
-        <div id="phonemeDetails" style="margin-top: 20px; padding: 10px; border: 1px solid #000;">
-            <h3>編集距離の詳細</h3>
-            <p><strong>挿入された音素:</strong> <span id="insertedPhonemes">ここに挿入された音素が表示されます。</span></p>
-            <p><strong>削除された音素:</strong> <span id="deletedPhonemes">ここに削除された音素が表示されます。</span></p>
-            <p><strong>置換された音素:</strong> <span id="substitutedPhonemes">ここに置換された音素が表示されます。</span></p>
-        </div>
     </div>
+
+
+
+        <h1 style="margin-right: 50px;">■ 詳細</h1>
+            <div style="margin-left: 70px; border: solid 2px rgb(93, 93, 93); margin: 0 auto; padding: 20px; width: 80%;">
+            <!-- ユーザー音声の発音評価エリア -->
+            <div id="evaluationDisplay" style="margin-top: 20px; padding: 10px;">
+                <h2>▶ ユーザー音声の発音評価</h2>
+                <p style="font-size: 23px; margin-left: 60px;" id="evaluationText">（ ここに発音評価が表示されます ）</p>
+            </div>
+
+
+
+
+            <h2>▶ 編集距離</h2>
+            <div id="phonemeDetails" style="margin-left: 70px;">
+                <p style="font-size: 23px;"><strong>挿入された音素:</strong> <span style="font-size: 23px;" id="insertedPhonemes">（ここに挿入された音素が表示されます）</span></p>
+                <p style="font-size: 23px;"><strong>削除された音素:</strong> <span style="font-size: 23px;" id="deletedPhonemes">（ここに削除された音素が表示されます）</span></p>
+                <p style="font-size: 23px;"><strong>置換された音素:</strong> <span style="font-size: 23px;" id="substitutedPhonemes">（ここに置換された音素が表示されます）</span></p>
+            </div>
+
+
 
     <!-- 【ここから下は非表示エリア】 ※消去することでエラーとなるので、消去不可※ -->
 
